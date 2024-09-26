@@ -155,7 +155,6 @@ class Psyclone(Tool):
         # as parameter. No API is required if PSyclone works as
         # transformation tool only, so calling PSyclone without api is
         # actually valid.
-        print("API", api, self._version)
         if api:
             if self._version > (2, 5, 0):
                 api_param = "--psykal-dsl"
