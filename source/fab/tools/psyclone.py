@@ -148,13 +148,14 @@ class Psyclone(Tool):
                                    "alg_file is specified.")
             if not transformed_file:
                 raise RuntimeError("PSyclone called without api, but "
-                                   "transformed_file is not specified.")
+                                   "transformed_file it not specified.")
 
         parameters: List[Union[str, Path]] = []
         # If an api is defined in this call (or in the constructor) add it
         # as parameter. No API is required if PSyclone works as
         # transformation tool only, so calling PSyclone without api is
         # actually valid.
+        print("API", api, self._version)
         if api:
             if self._version > (2, 5, 0):
                 api_param = "--psykal-dsl"
@@ -180,7 +181,7 @@ class Psyclone(Tool):
                 # New version: no API, parameter, but -o for output name:
                 parameters.extend(["-o", transformed_file])
             else:
-                # 2.5.0 or earlier: needs api nemo, output name is -oalg
+                # 2.5.0 or earlier: needs api nemo, output name is -opsy
                 parameters.extend(["-api", "nemo", "-opsy", transformed_file])
         parameters.extend(["-l", "all"])
 
