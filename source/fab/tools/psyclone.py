@@ -148,7 +148,7 @@ class Psyclone(Tool):
                                    "alg_file is specified.")
             if not transformed_file:
                 raise RuntimeError("PSyclone called without api, but "
-                                   "transformed_file it not specified.")
+                                   "transformed_file is not specified.")
 
         parameters: List[Union[str, Path]] = []
         # If an api is defined in this call (or in the constructor) add it
