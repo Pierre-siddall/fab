@@ -196,8 +196,9 @@ class Mpicc(CompilerWrapper):
 
 
 # ============================================================================
-class CrayFtn(CompilerWrapper):
-    '''Class for the Cray Fortran compiler wrapper.
+class CrayFtnWrapper(CompilerWrapper):
+    '''Class for the Cray Fortran compiler wrapper. We add 'wrapper' to the
+    class name to make this class distinct from the Crayftn compiler class.
 
     :param compiler: the compiler that the ftn wrapper will use.
     '''
@@ -208,8 +209,9 @@ class CrayFtn(CompilerWrapper):
 
 
 # ============================================================================
-class CrayCc(CompilerWrapper):
-    '''Class for the Cray C compiler wrapper
+class CrayCcWrapper(CompilerWrapper):
+    '''Class for the Cray C compiler wrapper. We add 'wrapper' to the class
+    name to make this class distinct from the Craycc compiler class
 
     :param compiler: the compiler that the mpicc wrapper will use.
     '''
