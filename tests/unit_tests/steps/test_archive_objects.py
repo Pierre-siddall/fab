@@ -81,12 +81,10 @@ class TestArchiveObjects:
         assert config.artefact_store[ArtefactSet.OBJECT_ARCHIVES] == {
             None: set([str(config.build_output / 'mylib.a')])}
 
-    def test_incorrect_tool(self):
+    def test_incorrect_tool(self, tool_box):
         '''Test that an incorrect archive tool is detected
         '''
-
-        config = BuildConfig('proj', ToolBox())
-        tool_box = config.tool_box
+        config = BuildConfig('proj', tool_box)
         cc = tool_box.get_tool(Category.C_COMPILER, config.mpi, config.openmp)
         # And set its category to be AR
         cc._category = Category.AR
