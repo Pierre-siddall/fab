@@ -34,9 +34,9 @@ class Compiler(CompilerSuiteTool):
         the version number from the version output of the compiler. The
         version is taken from the first group of a match.
     :param category: the Category (C_COMPILER or FORTRAN_COMPILER).
+    :param mpi: whether the compiler or linker support MPI.
     :param compile_flag: the compilation flag to use when only requesting
         compilation (not linking).
-    :param mpi: whether MPI is supported by this compiler or not.
     :param output_flag: the compilation flag to use to indicate the name
         of the output file
     :param openmp_flag: the flag to use to enable OpenMP. If no flag is
@@ -351,6 +351,7 @@ class Gcc(CCompiler):
 
     :param name: name of this compiler.
     :param exec_name: name of the executable.
+    :param mpi: whether the compiler supports MPI.
     '''
     def __init__(self,
                  name: str = "gcc",
@@ -372,6 +373,7 @@ class Gfortran(FortranCompiler):
 
     :param name: name of this compiler.
     :param exec_name: name of the executable.
+    :param mpi: whether the compiler supports MPI.
     '''
 
     def __init__(self, name: str = "gfortran",
@@ -392,6 +394,7 @@ class Icc(CCompiler):
 
     :param name: name of this compiler.
     :param exec_name: name of the executable.
+    :param mpi: whether the compiler supports MPI.
     '''
 
     def __init__(self, name: str = "icc", exec_name: str = "icc"):
@@ -406,6 +409,7 @@ class Ifort(FortranCompiler):
 
     :param name: name of this compiler.
     :param exec_name: name of the executable.
+    :param mpi: whether the compiler supports MPI.
     '''
 
     def __init__(self, name: str = "ifort", exec_name: str = "ifort"):
