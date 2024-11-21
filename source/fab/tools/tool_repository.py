@@ -170,7 +170,8 @@ class ToolRepository(dict):
 
         :param category: the category for which to return the default tool.
         :param mpi: if a compiler or linker is required that supports MPI.
-        :param openmp: if a compiler or linker is required that supports OpenMP.
+        :param openmp: if a compiler or linker is required that supports
+            OpenMP.
 
         :raises KeyError: if the category does not exist.
         :raises RuntimeError: if no compiler/linker is found with the

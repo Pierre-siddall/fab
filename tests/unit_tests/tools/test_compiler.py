@@ -670,7 +670,8 @@ def test_ifort_get_version_invalid_version(version):
     with mock.patch.object(ifort, "run", mock.Mock(return_value=full_output)):
         with pytest.raises(RuntimeError) as err:
             ifort.get_version()
-        assert "Unexpected version output format for compiler" in str(err.value)
+        assert ("Unexpected version output format for compiler"
+                in str(err.value))
 
 
 # ============================================================================
