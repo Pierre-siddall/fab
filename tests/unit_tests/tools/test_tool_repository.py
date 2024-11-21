@@ -158,7 +158,7 @@ def test_tool_repository_default_compiler_suite():
         is_available.return_value = True
         for cat in [Category.C_COMPILER, Category.FORTRAN_COMPILER,
                     Category.LINKER]:
-            def_tool = tr.get_default(cat, mpi=False, openmmp=False)
+            def_tool = tr.get_default(cat, mpi=False, openmp=False)
             assert def_tool.suite == "gnu"
 
         tr.set_default_compiler_suite("intel-classic")
@@ -181,6 +181,6 @@ def test_tool_repository_no_tool_available():
                     new_callable=mock.PropertyMock) as is_available:
         is_available.return_value = False
         with pytest.raises(RuntimeError) as err:
-            def_tool = tr.get_default(Category.SHELL)
+            tr.get_default(Category.SHELL)
         assert ("Can't find available 'SHELL' tool. Tools are 'bash,sh,ksh,"
                 "dash'" in str(err.value))
