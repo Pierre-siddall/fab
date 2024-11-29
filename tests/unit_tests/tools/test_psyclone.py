@@ -269,7 +269,7 @@ def test_psyclone_process_nemo_api_old_psyclone(version):
                                  ("gocean1.0", "gocean"),
                                  ("gocean", "gocean")
                                  ])
-def test_psyclone_process_api_new__psyclone(api):
+def test_psyclone_process_api_new_psyclone(api):
     '''Test running the new PSyclone version. Since this version is not
     yet released, we use the Fab internal version number 2.5.0.1 for
     now. It uses new API names, and we need to check that the old style
