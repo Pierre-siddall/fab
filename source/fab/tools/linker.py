@@ -168,7 +168,6 @@ class Linker(CompilerSuiteTool):
             wrapped linkers
         '''
         params: List[str] = []
-        print("gplf", self._pre_lib_flags, self, self._linker)
         if self._pre_lib_flags:
             params.extend(self._pre_lib_flags)
         if self._linker:
@@ -202,7 +201,7 @@ class Linker(CompilerSuiteTool):
             linker = linker._linker
         # Now we must have a compiler
         compiler = linker._compiler
-        assert compiler
+        assert compiler   # make mypy happy
         params.extend(compiler.flags)
 
         if openmp:
