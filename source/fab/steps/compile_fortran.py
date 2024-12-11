@@ -111,7 +111,8 @@ def compile_fortran(config: BuildConfig,
     log_or_dot_finish(logger)
 
     if syntax_only:
-        logger.info("Finalising two-stage compile: object files, single pass")
+        logger.info(f"Finalising two-stage compile: object files, single "
+                    f"pass for {len(uncompiled)} files.")
         mp_common_args.syntax_only = False
 
         # A single pass should now compile all the object files in one go
@@ -121,8 +122,10 @@ def compile_fortran(config: BuildConfig,
         results_this_pass = run_mp(config, items=mp_args, func=process_file)
         log_or_dot_finish(logger)
         check_for_errors(results_this_pass, caller_label="compile_fortran")
-        compiled_this_pass = list(by_type(results_this_pass, CompiledFile))
-        logger.info(f"stage 2 compiled {len(compiled_this_pass)} files")
+        # The previous call raises an exception in case of an error.
+        # So at this stage the number of list elements (which are tuples
+        # of compiled_file, artefact) is the number of compiled files
+        logger.info(f"stage 2 compiled {len(results_this_pass)} files")
 
     # record the compilation results for the next step
     store_artefacts(compiled, build_lists, config.artefact_store)
