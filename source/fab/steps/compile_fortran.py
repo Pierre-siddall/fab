@@ -111,7 +111,8 @@ def compile_fortran(config: BuildConfig,
     log_or_dot_finish(logger)
 
     if syntax_only:
-        logger.info("Finalising two-stage compile: object files, single pass")
+        logger.info(f"Finalising two-stage compile: object files, single "
+                    f"pass for {len(uncompiled)} files.")
         mp_common_args.syntax_only = False
 
         # A single pass should now compile all the object files in one go
@@ -121,8 +122,7 @@ def compile_fortran(config: BuildConfig,
         results_this_pass = run_mp(config, items=mp_args, func=process_file)
         log_or_dot_finish(logger)
         check_for_errors(results_this_pass, caller_label="compile_fortran")
-        compiled_this_pass = list(by_type(results_this_pass, CompiledFile))
-        logger.info(f"stage 2 compiled {len(compiled_this_pass)} files")
+        logger.info(f"stage 2 compiled {len(results_this_pass)} files")        
 
     # record the compilation results for the next step
     store_artefacts(compiled, build_lists, config.artefact_store)
@@ -300,6 +300,12 @@ def process_file(arg: Tuple[AnalysedFortran, MpCommonArgs]) \
             except Exception as err:
                 return Exception(f"Error compiling {analysed_file.fpath}:\n"
                                  f"{err}"), None
+            try:
+                import subprocess
+                res = subprocess.run(f"ls -l {obj_file_prebuild}", capture_output=True, shell=True)
+                logger.debug(f"CompileFortranResult {res.returncode} {res.stdout.decode()}")
+            except:
+                logger.debug(f"Error running ls for {obj_file_prebuild}")
 
             # copy the mod files to the prebuild folder as artefacts for reuse
             # note: perhaps we could sometimes avoid these copies because mods
@@ -388,11 +394,15 @@ def compile_file(analysed_file, flags, output_fpath, mp_common_args):
     # tool
     config = mp_common_args.config
     compiler = config.tool_box[Category.FORTRAN_COMPILER]
-
-    compiler.compile_file(input_file=analysed_file, output_file=output_fpath,
-                          openmp=config.openmp,
-                          add_flags=flags,
-                          syntax_only=mp_common_args.syntax_only)
+    
+    try:    
+        compiler.compile_file(input_file=analysed_file, output_file=output_fpath,
+                              openmp=config.openmp,
+                              add_flags=flags,
+                              syntax_only=mp_common_args.syntax_only)
+    except Exception as err:
+        return Exception(f"Error compiling {analysed_file.fpath}:\n"
+                                 f"{err}"), None
 
 
 def get_mod_hashes(analysed_files: Set[AnalysedFortran],
