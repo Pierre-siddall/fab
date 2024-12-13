@@ -9,9 +9,8 @@ from fab.artefacts import ArtefactSet, ArtefactStore
 from fab.build_config import BuildConfig, FlagsConfig
 from fab.parse.fortran import AnalysedFortran
 from fab.steps.compile_fortran import (
-    compile_pass, get_compile_next,
-    get_mod_hashes, handle_compiler_args, MpCommonArgs, process_file,
-    store_artefacts)
+    compile_pass, get_compile_next, get_mod_hashes, handle_compiler,
+    MpCommonArgs, process_file, store_artefacts)
 from fab.tools import Category, ToolBox
 from fab.util import CompiledFile
 
@@ -50,7 +49,7 @@ def test_compile_cc_wrong_compiler(tool_box):
             "'C_COMPILER' instead of FortranCompiler" in str(err.value))
 
     with pytest.raises(RuntimeError) as err:
-        handle_compiler_args(config)
+        handle_compiler(config)
     assert ("Unexpected tool 'mock_fortran_compiler' of category "
             "'C_COMPILER' instead of FortranCompiler" in str(err.value))
 

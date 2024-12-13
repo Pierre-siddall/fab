@@ -78,7 +78,6 @@ def compile_fortran(config: BuildConfig,
     build_lists: Dict[str, List] = source_getter(config.artefact_store)
 
     # compile everything in multiple passes
-    compiled: Dict[Path, CompiledFile] = {}
     uncompiled: Set[AnalysedFortran] = set(sum(build_lists.values(), []))
     logger.info(f"compiling {len(uncompiled)} fortran files")
 
@@ -86,12 +85,21 @@ def compile_fortran(config: BuildConfig,
     if len(uncompiled) == 0:
         return
 
-    compiler, flags_config = handle_compiler_args(config, common_flags,
-                                                  path_flags)
+    compiler = handle_compiler(config)
+    syntax_only = compiler.has_syntax_only and config.two_stage
+
+    if syntax_only:
+        # In the second phase, the module output directory is set to a
+        # temporary directory (to avoid that a compilation step overwrites
+        # a module file while a parallel process is trying to read it).
+        # So in order for the second phase to find the original module files
+        # from the first phase, add them explicitly as an include path.
+        common_flags = common_flags[:] + ["-I", str(config.build_output)]
+
+    flags_config = handle_compiler_args(common_flags, path_flags)
     # Set module output folder:
     compiler.set_module_output_path(config.build_output)
 
-    syntax_only = compiler.has_syntax_only and config.two_stage
     # build the arguments passed to the multiprocessing function
     mp_common_args = MpCommonArgs(
         config=config, flags=flags_config,
@@ -103,6 +111,7 @@ def compile_fortran(config: BuildConfig,
         logger.info(f"Compiler {compiler.name} does not support syntax-only, "
                     f"disabling two-stage compile.")
 
+    compiled: Dict[Path, CompiledFile] = {}
     while uncompiled:
         uncompiled = compile_pass(config=config, compiled=compiled,
                                   uncompiled=uncompiled,
@@ -111,6 +120,16 @@ def compile_fortran(config: BuildConfig,
     log_or_dot_finish(logger)
 
     if syntax_only:
+        # In two stage compilation, we have to change the output directory
+        # for module files, otherwise (some ... at least the intel compiler)
+        # will rewrite the module files. If in parallel another process tries
+        # to read this module file, it will be incomplete and compilation
+        # will fail. So create a separate output directory for the
+        # (unnecessarily) created new module files.
+        tmp_mod_path = config.build_output / "modules_second_stage"
+        tmp_mod_path.mkdir(parents=True, exist_ok=True)
+        compiler.set_module_output_path(tmp_mod_path)
+
         logger.info("Finalising two-stage compile: object files, single pass")
         mp_common_args.syntax_only = False
 
@@ -132,10 +151,13 @@ def compile_fortran(config: BuildConfig,
     store_artefacts(compiled, build_lists, config.artefact_store)
 
 
-def handle_compiler_args(config: BuildConfig, common_flags=None,
-                         path_flags=None):
+def handle_compiler(config) -> Compiler:
+    '''Verifies and returns the compiler instance to use.
+    :return: the compiler instance to use.
 
-    # Command line tools are sometimes specified with flags attached.
+    :raises RuntimeError: if an invalid Fortran compiler should have
+        been specified.
+    '''
     compiler = config.tool_box[Category.FORTRAN_COMPILER]
     if compiler.category != Category.FORTRAN_COMPILER:
         raise RuntimeError(f"Unexpected tool '{compiler.name}' of category "
@@ -143,14 +165,19 @@ def handle_compiler_args(config: BuildConfig, common_flags=None,
     compiler = cast(Compiler, compiler)
     logger.info(
         f'Fortran compiler is {compiler} {compiler.get_version_string()}')
+    return compiler
 
+
+def handle_compiler_args(common_flags=None, path_flags=None):
+
+    # Command line tools are sometimes specified with flags attached.
     # Collate the flags from 1) flags env and 2) parameters.
     env_flags = os.getenv('FFLAGS', '').split()
     common_flags = env_flags + (common_flags or [])
     flags_config = FlagsConfig(common_flags=common_flags,
                                path_flags=path_flags)
 
-    return compiler, flags_config
+    return flags_config
 
 
 def compile_pass(config, compiled: Dict[Path, CompiledFile],
