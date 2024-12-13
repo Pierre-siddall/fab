@@ -119,9 +119,13 @@ def compile_fortran(config: BuildConfig,
         uncompiled = set(sum(build_lists.values(), []))
         mp_args = [(fpath, mp_common_args) for fpath in uncompiled]
         results_this_pass = run_mp(config, items=mp_args, func=process_file)
+        # We don't need the prebuild files
+        compilation_results, _ = (zip(*results_this_pass)
+                                  if results_this_pass
+                                  else (tuple(), tuple()))
         log_or_dot_finish(logger)
-        check_for_errors(results_this_pass, caller_label="compile_fortran")
-        compiled_this_pass = list(by_type(results_this_pass, CompiledFile))
+        check_for_errors(compilation_results, caller_label="compile_fortran")
+        compiled_this_pass = list(by_type(compilation_results, CompiledFile))
         logger.info(f"stage 2 compiled {len(compiled_this_pass)} files")
 
     # record the compilation results for the next step
