@@ -22,7 +22,7 @@ from fab.build_config import BuildConfig, FlagsConfig
 from fab.metrics import send_metric
 from fab.parse.fortran import AnalysedFortran
 from fab.steps import check_for_errors, run_mp, step
-from fab.tools import Category, Compiler, Flags
+from fab.tools import Category, Compiler, Flags, FortranCompiler
 from fab.util import (CompiledFile, log_or_dot_finish, log_or_dot, Timer,
                       by_type, file_checksum)
 
@@ -88,6 +88,7 @@ def compile_fortran(config: BuildConfig,
     compiler = handle_compiler(config)
     syntax_only = compiler.has_syntax_only and config.two_stage
 
+    common_flags = common_flags or []
     if syntax_only:
         # In the second phase, the module output directory is set to a
         # temporary directory (to avoid that a compilation step overwrites
@@ -151,7 +152,7 @@ def compile_fortran(config: BuildConfig,
     store_artefacts(compiled, build_lists, config.artefact_store)
 
 
-def handle_compiler(config) -> Compiler:
+def handle_compiler(config) -> FortranCompiler:
     '''Verifies and returns the compiler instance to use.
     :return: the compiler instance to use.
 
