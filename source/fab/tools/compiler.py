@@ -545,7 +545,7 @@ class Craycc(CCompiler):
     def __init__(self, name: str = "craycc-cc", exec_name: str = "cc"):
         super().__init__(name, exec_name, suite="cray", mpi=True,
                          openmp_flag="-homp",
-                         version_regex=r"Cray [Cc][^\d]* (\d[\d\.]+\d)  ")
+                         version_regex=r"Cray [Cc][^\d]* (\d[\d\.]+\d)$")
 
 
 # ============================================================================
@@ -564,4 +564,4 @@ class Crayftn(FortranCompiler):
                          openmp_flag="-homp",
                          syntax_only_flag="-syntax-only",
                          version_regex=(r"Cray Fortran : Version "
-                                        r"(\d[\d\.]+\d)  "))
+                                        r"(\d[\d\.]+\d)$"))
