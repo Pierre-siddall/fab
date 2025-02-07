@@ -7,7 +7,7 @@
 '''Tests the compiler wrapper implementation.
 '''
 
-from pathlib import Path, PosixPath
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -179,10 +179,10 @@ def test_compiler_wrapper_fortran_with_add_args():
                                 syntax_only=True)
         # Notice that "-J/b" has been removed
         mpif90.compiler.run.assert_called_with(
-            cwd=PosixPath('.'), additional_parameters=['-c', "-O3",
-                                                       '-fsyntax-only',
-                                                       '-J', '/module_out',
-                                                       'a.f90', '-o', 'a.o'])
+            cwd=Path('.'), additional_parameters=['-c', "-O3",
+                                                  '-fsyntax-only',
+                                                  '-J', '/module_out',
+                                                  'a.f90', '-o', 'a.o'])
 
 
 def test_compiler_wrapper_fortran_with_add_args_unnecessary_openmp():
@@ -199,7 +199,7 @@ def test_compiler_wrapper_fortran_with_add_args_unnecessary_openmp():
                                 add_flags=["-fopenmp", "-O3"],
                                 openmp=True, syntax_only=True)
             mpif90.compiler.run.assert_called_with(
-                cwd=PosixPath('.'),
+                cwd=Path('.'),
                 additional_parameters=['-c', '-fopenmp', '-fopenmp', '-O3',
                                        '-fsyntax-only', '-J', '/module_out',
                                        'a.f90', '-o', 'a.o'])
@@ -219,8 +219,8 @@ def test_compiler_wrapper_c_with_add_args():
         mpicc.compile_file(Path("a.f90"), "a.o", openmp=False,
                            add_flags=["-O3"])
         mpicc.compiler.run.assert_called_with(
-            cwd=PosixPath('.'), additional_parameters=['-c', "-O3",
-                                                       'a.f90', '-o', 'a.o'])
+            cwd=Path('.'), additional_parameters=['-c', "-O3", 'a.f90',
+                                                  '-o', 'a.o'])
         # Invoke C compiler with syntax-only flag (which is only supported
         # by Fortran compilers), which should raise an exception.
         with pytest.raises(RuntimeError) as err:
@@ -238,7 +238,7 @@ def test_compiler_wrapper_c_with_add_args():
                                add_flags=["-fopenmp", "-O3"],
                                openmp=True)
             mpicc.compiler.run.assert_called_with(
-                cwd=PosixPath('.'),
+                cwd=Path('.'),
                 additional_parameters=['-c', '-fopenmp', '-fopenmp', '-O3',
                                        'a.f90', '-o', 'a.o'])
 
@@ -257,10 +257,14 @@ def test_compiler_wrapper_flags_independent():
     assert mpicc.flags == ["-a", "-b"]
     assert mpicc.openmp_flag == gcc.openmp_flag
 
-    # Test  a compiler wrapper correctly queries the wrapper compiler
-    # for openmp flag: Set the wrapper to have no _openmp_flag (which
-    # is actually the default, since it never sets this), but gcc
-    # does have a flag -s o mpicc should report that is supports openmp
+    # Test  a compiler wrapper correctly queries the wrapper compiler for
+    # openmp flag: Set the wrapper to have no _openmp_flag (which is
+    # actually the default, since the wrapper never sets its own flag), but
+    # gcc does have a flag, so mpicc should report that is supports openmp.
+    # mpicc.openmp calls openmp of its base class (Compiler), which queries
+    # if an openmp flag is defined. This query must go to the openmp property,
+    # since the wrapper overwrites this property to return the wrapped
+    # compiler's flag (and not the wrapper's flag, which would not be defined)
     with mock.patch.object(mpicc, "_openmp_flag", ""):
         assert mpicc._openmp_flag == ""
         assert mpicc.openmp
@@ -289,7 +293,7 @@ def test_compiler_wrapper_flags_with_add_arg():
         mpicc.compile_file(Path("a.f90"), "a.o", add_flags=["-f"],
                            openmp=True)
         mpicc.compiler.run.assert_called_with(
-                cwd=PosixPath('.'),
+                cwd=Path('.'),
                 additional_parameters=["-c", "-fopenmp", "-a", "-b", "-d",
                                        "-e", "-f", "a.f90", "-o", "a.o"])
 
@@ -308,7 +312,7 @@ def test_compiler_wrapper_flags_without_add_arg():
         # Test if no add_flags are specified:
         mpicc.compile_file(Path("a.f90"), "a.o", openmp=True)
         mpicc.compiler.run.assert_called_with(
-                cwd=PosixPath('.'),
+                cwd=Path('.'),
                 additional_parameters=["-c", "-fopenmp", "-a", "-b", "-d",
                                        "-e", "a.f90", "-o", "a.o"])
 
