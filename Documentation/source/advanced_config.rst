@@ -256,14 +256,6 @@ not hard-code flags for a specific linker. Adding the flag to the linker
 instance itself, as shown further above, is the better approach.
 
 
-Linkers will be pre-configured with flags for common libraries. Where possible,
-a library name should be used to include the required flags for linking.
-
-.. code-block::
-    :linenos:
-
-    link_exe(state, libs=['netcdf'])
-
 Path-specific flags
 -------------------
 
