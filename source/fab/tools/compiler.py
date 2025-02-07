@@ -69,7 +69,7 @@ class Compiler(CompilerSuiteTool):
 
     @property
     def mpi(self) -> bool:
-        '''Returns whether this compiler supports MPI or not.'''
+        ''':returns: whether this compiler supports MPI or not.'''
         return self._mpi
 
     @property
@@ -80,7 +80,7 @@ class Compiler(CompilerSuiteTool):
 
     @property
     def openmp_flag(self) -> str:
-        '''Returns the flag to enable OpenMP.'''
+        ''':returns: the flag to enable OpenMP.'''
         return self._openmp_flag
 
     def get_hash(self) -> int:
@@ -510,7 +510,7 @@ class Craycc(CCompiler):
     def __init__(self, name: str = "craycc-cc", exec_name: str = "cc"):
         super().__init__(name, exec_name, suite="cray", mpi=True,
                          openmp_flag="-homp",
-                         version_regex=r"Cray [Cc][^\d]* (\d[\d\.]+\d)  ")
+                         version_regex=r"Cray [Cc][^\d]* (\d[\d\.]+\d)")
 
 
 # ============================================================================
@@ -529,4 +529,4 @@ class Crayftn(FortranCompiler):
                          openmp_flag="-homp",
                          syntax_only_flag="-syntax-only",
                          version_regex=(r"Cray Fortran : Version "
-                                        r"(\d[\d\.]+\d)  "))
+                                        r"(\d[\d\.]+\d)"))
