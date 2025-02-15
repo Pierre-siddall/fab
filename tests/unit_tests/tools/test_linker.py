@@ -13,7 +13,7 @@ import warnings
 
 import pytest
 
-from fab.tools import (Category, Linker, ToolRepository)
+from fab.tools import Category, CompilerWrapper, Linker, ToolRepository
 
 
 def test_linker(mock_c_compiler, mock_fortran_compiler):
@@ -369,3 +369,26 @@ def test_linker_inheriting():
     with pytest.raises(RuntimeError) as err:
         linker_mpif90.get_lib_flags("does_not_exist")
     assert "Unknown library name: 'does_not_exist'" in str(err.value)
+
+
+def test_linker_profile_flags_inheriting(mock_c_compiler):
+    '''Test nested compiler and nested linker with inherited profiling flags.
+
+    '''
+    mock_c_compiler_wrapper = CompilerWrapper(name="mock_c_compiler_wrapper",
+                                              compiler=mock_c_compiler,
+                                              exec_name="exec_name")
+    linker = Linker(mock_c_compiler_wrapper)
+    linker_wrapper = Linker(mock_c_compiler_wrapper, linker=linker)
+    count = 0
+    for pf in [mock_c_compiler._profile_flags,
+               mock_c_compiler_wrapper._profile_flags]:
+        pf.define_profile("base")
+        pf.define_profile("derived", "base")
+        pf.add_flags("base", f"-f{count}")
+        pf.add_flags("derived", f"-f{count+1}")
+        count += 2
+
+    # One set f1-f4 from the compiler wrapper, one from the wrapped linker
+    assert (linker_wrapper.get_profile_flags("derived") ==
+            ["-f0", "-f1", "-f2", "-f3", "-f0", "-f1", "-f2", "-f3"])

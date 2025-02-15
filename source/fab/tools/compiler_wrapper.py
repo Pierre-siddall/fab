@@ -120,6 +120,12 @@ class CompilerWrapper(Compiler):
         raise RuntimeError(f"Compiler '{self._compiler.name}' has "
                            f"no has_syntax_only.")
 
+    def get_profile_flags(self, profile: str) -> List[str]:
+        ''':returns; the ProfileFlags for the given profile, combined
+        from the wrapped compiler and this wrapper.
+        :param profile: the profile to use.'''
+        return self._compiler.get_profile_flags(profile) + self._profile_flags[profile]
+
     def set_module_output_path(self, path: Path):
         '''Sets the output path for modules.
 

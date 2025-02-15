@@ -74,6 +74,11 @@ class Compiler(CompilerSuiteTool):
         ''':returns; the ProfileFlags for this compiler.'''
         return self._profile_flags
 
+    def get_profile_flags(self, profile: str) -> List[str]:
+        ''':returns; the ProfileFlags for the given profile.
+        :param profile: the profile to use.'''
+        return self._profile_flags[profile]
+
     @property
     def mpi(self) -> bool:
         ''':returns: whether this compiler supports MPI or not.'''
@@ -132,7 +137,7 @@ class Compiler(CompilerSuiteTool):
                     f"instead.")
             params += add_flags
 
-        params.extend(self.profile_flags[config.profile])
+        params.extend(self.get_profile_flags(config.profile))
 
         params.extend([input_file.name,
                       self._output_flag, str(output_file)])

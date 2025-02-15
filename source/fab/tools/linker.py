@@ -91,6 +91,16 @@ class Linker(CompilerSuiteTool):
         '''
         return self._compiler.output_flag
 
+    def get_profile_flags(self, profile: str) -> List[str]:
+        ''':returns; the ProfileFlags for the given profile, combined
+        from the wrapped compiler and this wrapper.
+        :param profile: the profile to use.'''
+        if self._linker:
+            flags = self._linker.get_profile_flags(profile)[:]
+        else:
+            flags = []
+        return flags + self._compiler.get_profile_flags(profile)
+
     def get_lib_flags(self, lib: str) -> List[str]:
         '''Gets the standard flags for a standard library
 
@@ -201,7 +211,7 @@ class Linker(CompilerSuiteTool):
         # TODO: For now we pick up both flags from ProfileFlags and the
         # standard ones from Tool.
         params.extend(self._compiler.flags)
-        params.extend(self._compiler.profile_flags[config.profile])
+        params.extend(self._compiler.get_profile_flags(config.profile))
 
         if config.openmp:
             params.append(self._compiler.openmp_flag)
