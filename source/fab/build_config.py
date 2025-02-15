@@ -44,6 +44,7 @@ class BuildConfig():
                  tool_box: ToolBox,
                  mpi: bool = False,
                  openmp: bool = False,
+                 profile: str = "default",
                  multiprocessing: bool = True,
                  n_procs: Optional[int] = None,
                  reuse_artefacts: bool = False,
@@ -63,6 +64,7 @@ class BuildConfig():
             (if none is explicitly set in the ToolBox). The compiler-specific
             flag to enable OpenMP will automatically be added when compiling
             and linking.
+        :param profile: the name of a compiler profile to use.
         :param multiprocessing:
             An option to disable multiprocessing to aid debugging.
         :param n_procs:
@@ -87,6 +89,7 @@ class BuildConfig():
         self._tool_box = tool_box
         self._mpi = mpi
         self._openmp = openmp
+        self._profile = profile
         self.two_stage = two_stage
         self.verbose = verbose
         compiler = tool_box.get_tool(Category.FORTRAN_COMPILER, mpi=mpi,
@@ -198,6 +201,11 @@ class BuildConfig():
     def openmp(self) -> bool:
         ''':returns: whether OpenMP is requested or not in this config.'''
         return self._openmp
+
+    @property
+    def profile(self) -> str:
+        ''':returns: the name of the compiler profile to use.'''
+        return self._profile
 
     def add_current_prebuilds(self, artefacts: Iterable[Path]):
         """

@@ -9,7 +9,7 @@
 
 import pytest
 
-from fab.tools import Flags
+from fab.tools import Flags, ProfileFlags
 
 
 def test_flags_constructor():
@@ -71,3 +71,79 @@ def test_flags_checksum():
     # I think this is a poor testing pattern.
     flags = Flags(['one', 'two', 'three', 'four'])
     assert flags.checksum() == 3011366051
+
+
+def test_profile_flags():
+    '''Tests adding flags.'''
+    pf = ProfileFlags()
+    pf.define_profile("base")
+    assert pf["base"] == []
+    pf.add_flags("base", "-base")
+    assert pf["base"] == ["-base"]
+    pf.add_flags("base", ["-base2", "-base3"])
+    assert pf["base"] == ["-base", "-base2", "-base3"]
+
+
+def test_profile_flags_inheriting():
+    '''Tests adding flags.'''
+    pf = ProfileFlags()
+    pf.define_profile("base")
+    assert pf["base"] == []
+    pf.add_flags("base", "-base")
+    assert pf["base"] == ["-base"]
+
+    pf.define_profile("derived", "base")
+    assert pf["derived"] == ["-base"]
+    pf.add_flags("derived", "-derived")
+    assert pf["derived"] == ["-base", "-derived"]
+
+    pf.define_profile("derived2", "derived")
+    assert pf["derived2"] == ["-base", "-derived"]
+    pf.add_flags("derived2", "-derived2")
+    assert pf["derived2"] == ["-base", "-derived", "-derived2"]
+
+
+def test_profile_flags_removing():
+    '''Tests adding flags.'''
+    pf = ProfileFlags()
+    pf.define_profile("base")
+    assert pf["base"] == []
+    pf.add_flags("base", ["-base1", "-base2"])
+    warn_message = "Removing managed flag '-base1'."
+    with pytest.warns(UserWarning, match=warn_message):
+        pf.remove_flag("base", "-base1")
+    assert pf["base"] == ["-base2"]
+
+
+def test_profile_flags_checksum():
+    '''Tests computation of the checksum.'''
+    pf = ProfileFlags()
+    pf.define_profile("base")
+    pf.add_flags("base", ['one', 'two', 'three', 'four'])
+    assert pf.checksum("base") == 3011366051
+
+
+def test_profile_flags_errors_invalid_profile_name():
+    '''Tests that given undefined profile names will raise
+    KeyError in call functions.
+    '''
+    pf = ProfileFlags()
+    pf.define_profile("base",)
+    with pytest.raises(KeyError) as err:
+        pf.define_profile("base")
+    assert "Profile 'base' is already defined." in str(err.value)
+
+    with pytest.raises(KeyError) as err:
+        pf.add_flags("does not exist", [])
+    assert ("add_flags: Profile 'does not exist' is not defined."
+            in str(err.value))
+
+    with pytest.raises(KeyError) as err:
+        pf.remove_flag("does not exist", [])
+    assert ("remove_flag: Profile 'does not exist' is not defined."
+            in str(err.value))
+
+    with pytest.raises(KeyError) as err:
+        pf.checksum("does not exist")
+    assert ("checksum: Profile 'does not exist' is not defined."
+            in str(err.value))

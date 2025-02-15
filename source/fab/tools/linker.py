@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 import warnings
 
+from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler
 from fab.tools.tool import CompilerSuiteTool
@@ -181,14 +182,15 @@ class Linker(CompilerSuiteTool):
         return params
 
     def link(self, input_files: List[Path], output_file: Path,
-             openmp: bool,
+             config: BuildConfig,
              libs: Optional[List[str]] = None) -> str:
         '''Executes the linker with the specified input files,
         creating `output_file`.
 
         :param input_files: list of input files to link.
         :param output_file: output file.
-        :param openm: whether OpenMP is requested or not.
+        :param config: The BuildConfig, from which compiler profile and OpenMP
+            status are taken.
         :param libs: additional libraries to link with.
 
         :returns: the stdout of the link command
@@ -196,9 +198,12 @@ class Linker(CompilerSuiteTool):
 
         params: List[Union[str, Path]] = []
 
+        # TODO: For now we pick up both flags from ProfileFlags and the
+        # standard ones from Tool.
         params.extend(self._compiler.flags)
+        params.extend(self._compiler.profile_flags[config.profile])
 
-        if openmp:
+        if config.openmp:
             params.append(self._compiler.openmp_flag)
 
         # TODO: why are the .o files sorted? That shouldn't matter

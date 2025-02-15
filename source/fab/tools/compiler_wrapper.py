@@ -14,7 +14,7 @@ from typing import cast, List, Optional, Tuple, Union
 from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler, FortranCompiler
-from fab.tools.flags import Flags
+from fab.tools.flags import Flags, ProfileFlags
 
 
 class CompilerWrapper(Compiler):
@@ -90,6 +90,11 @@ class CompilerWrapper(Compiler):
     def flags(self) -> Flags:
         ''':returns: the flags to be used with this tool.'''
         return Flags(self._compiler.flags + self._flags)
+
+    @property
+    def profile_flags(self) -> ProfileFlags:
+        ''':returns: the flags to be used with this tool.'''
+        return self._compiler.profile_flags
 
     @property
     def suite(self) -> str:

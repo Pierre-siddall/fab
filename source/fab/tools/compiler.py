@@ -17,7 +17,7 @@ import zlib
 
 from fab.build_config import BuildConfig
 from fab.tools.category import Category
-from fab.tools.flags import Flags
+from fab.tools.flags import Flags, ProfileFlags
 from fab.tools.tool import CompilerSuiteTool
 
 
@@ -66,7 +66,13 @@ class Compiler(CompilerSuiteTool):
         self._output_flag = output_flag if output_flag else "-o"
         self._openmp_flag = openmp_flag if openmp_flag else ""
         self.add_flags(os.getenv("FFLAGS", "").split())
+        self._profile_flags = ProfileFlags()
         self._version_regex = version_regex
+
+    @property
+    def profile_flags(self) -> ProfileFlags:
+        ''':returns; the ProfileFlags for this compiler.'''
+        return self._profile_flags
 
     @property
     def mpi(self) -> bool:
@@ -125,6 +131,8 @@ class Compiler(CompilerSuiteTool):
                     f"OpenMP should be enabled in the BuildConfiguration "
                     f"instead.")
             params += add_flags
+
+        params.extend(self.profile_flags[config.profile])
 
         params.extend([input_file.name,
                       self._output_flag, str(output_file)])

@@ -10,7 +10,7 @@ PR.
 '''
 
 import logging
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 import warnings
 
 from fab.util import string_checksum
@@ -91,3 +91,86 @@ class Flags(list):
                 del self[i]
                 continue
             i += 1
+
+
+class ProfileFlags:
+
+    def __init__(self):
+        # Stores the flags for each profile mode. The key is the (lower case)
+        # name of the profile mode, and it contains a list of flags
+        self._profiles: Dict[str, Flags] = {}
+
+        # This dictionary stores an optional inheritance, where one mode
+        # 'inherits' the flags from a different mode (recursively)
+        self._inherit_from: Dict[str, str] = {}
+        self.define_profile("default")
+
+    def __getitem__(self, profile: str) -> List[str]:
+        profile = profile.lower()
+
+        # First add any flags that we inherit. This will recursively call
+        # this __getitem__ to resolve inheritance chains.
+        if profile in self._inherit_from:
+            inherit_from = self._inherit_from[profile]
+            flags = self[inherit_from][:]
+        else:
+            flags = []
+        # Now add the flags from this ProfileFlags. It is possible that this
+        # compiler does not have a profile defined, only the base one might.
+        if profile in self._profiles:
+            flags.extend(self._profiles[profile])
+
+        return flags
+
+    def define_profile(self,
+                       name: str,
+                       inherit_from: Optional[str] = None):
+        if name in self._profiles:
+            raise KeyError(f"Profile '{name}' is already defined.")
+        self._profiles[name.lower()] = Flags()
+
+        if inherit_from:
+            self._inherit_from[name.lower()] = inherit_from.lower()
+
+    def add_flags(self,
+                  profile: str,
+                  new_flags: Union[str, List[str]]):
+        '''Adds the specified flags to the list of flags.
+
+        :param new_flags: A single string or list of strings which are the
+            flags to be added.
+        '''
+
+        if not profile.lower() in self._profiles:
+            raise KeyError(f"add_flags: Profile '{profile}' is not defined.")
+
+        if isinstance(new_flags, str):
+            new_flags = [new_flags]
+
+        self._profiles[profile.lower()].add_flags(new_flags)
+
+    def remove_flag(self,
+                    profile: str,
+                    remove_flag: str,
+                    has_parameter: bool = False):
+        '''Adds the specified flags to the list of flags.
+
+        :param new_flags: A single string or list of strings which are the
+            flags to be added.
+        '''
+
+        if not profile.lower() in self._profiles:
+            raise KeyError(f"remove_flag: Profile '{profile}' is not defined.")
+
+        self._profiles[profile.lower()].remove_flag(remove_flag,
+                                                    has_parameter)
+
+    def checksum(self, profile: str) -> str:
+        """
+        :returns: a checksum of the flags.
+
+        """
+        if not profile.lower() in self._profiles:
+            raise KeyError(f"checksum: Profile '{profile}' is not defined.")
+
+        return self._profiles[profile.lower()].checksum()
