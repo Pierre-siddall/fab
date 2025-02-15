@@ -394,7 +394,7 @@ def compile_file(analysed_file, flags, output_fpath, mp_common_args):
     compiler = config.tool_box[Category.FORTRAN_COMPILER]
 
     compiler.compile_file(input_file=analysed_file, output_file=output_fpath,
-                          openmp=config.openmp,
+                          config=config,
                           add_flags=flags,
                           syntax_only=mp_common_args.syntax_only)
 

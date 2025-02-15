@@ -148,7 +148,7 @@ def _compile_file(arg: Tuple[AnalysedC, MpCommonArgs]):
             log_or_dot(logger, f'CompileC compiling {analysed_file.fpath}')
             try:
                 compiler.compile_file(analysed_file.fpath, obj_file_prebuild,
-                                      openmp=config.openmp,
+                                      config=config,
                                       add_flags=flags)
             except RuntimeError as err:
                 return FabException(f"error compiling "

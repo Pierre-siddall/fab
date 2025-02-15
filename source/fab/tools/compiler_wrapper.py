@@ -11,6 +11,7 @@ the derived classes for mpif90, mpicc, and CrayFtnWrapper and CrayCcWrapper.
 from pathlib import Path
 from typing import cast, List, Optional, Tuple, Union
 
+from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler, FortranCompiler
 from fab.tools.flags import Flags
@@ -130,7 +131,7 @@ class CompilerWrapper(Compiler):
 
     def compile_file(self, input_file: Path,
                      output_file: Path,
-                     openmp: bool,
+                     config: BuildConfig,
                      add_flags: Union[None, List[str]] = None,
                      syntax_only: Optional[bool] = None):
         # pylint: disable=too-many-arguments
@@ -140,7 +141,8 @@ class CompilerWrapper(Compiler):
 
         :param input_file: the name of the input file.
         :param output_file: the name of the output file.
-        :param openmp: if compilation should be done with OpenMP.
+        :param config: The BuildConfig, from which compiler profile and OpenMP
+            status are taken.
         :param add_flags: additional flags for the compiler.
         :param syntax_only: if set, the compiler will only do
             a syntax check
@@ -160,7 +162,7 @@ class CompilerWrapper(Compiler):
             # (or a CompilerWrapper in case of nested CompilerWrappers,
             # which also supports the syntax_only flag anyway)
             self._compiler = cast(FortranCompiler, self._compiler)
-            self._compiler.compile_file(input_file, output_file, openmp=openmp,
+            self._compiler.compile_file(input_file, output_file, config=config,
                                         add_flags=self.flags + add_flags,
                                         syntax_only=syntax_only,
                                         )
@@ -168,7 +170,7 @@ class CompilerWrapper(Compiler):
             if syntax_only is not None:
                 raise RuntimeError(f"Syntax-only cannot be used with compiler "
                                    f"'{self.name}'.")
-            self._compiler.compile_file(input_file, output_file, openmp=openmp,
+            self._compiler.compile_file(input_file, output_file, config=config,
                                         add_flags=self.flags+add_flags
                                         )
         self._compiler.change_exec_name(orig_compiler_name)

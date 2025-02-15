@@ -15,6 +15,7 @@ import warnings
 from typing import cast, List, Optional, Tuple, Union
 import zlib
 
+from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.flags import Flags
 from fab.tools.tool import CompilerSuiteTool
@@ -98,7 +99,7 @@ class Compiler(CompilerSuiteTool):
 
     def compile_file(self, input_file: Path,
                      output_file: Path,
-                     openmp: bool,
+                     config: BuildConfig,
                      add_flags: Union[None, List[str]] = None):
         '''Compiles a file. It will add the flag for compilation-only
         automatically, as well as the output directives. The current working
@@ -109,12 +110,13 @@ class Compiler(CompilerSuiteTool):
 
         :param input_file: the path of the input file.
         :param output_file: the path of the output file.
-        :param opemmp: whether OpenMP should be used or not.
+        :param config: The BuildConfig, from which compiler profile and OpenMP
+            status are taken.
         :param add_flags: additional compiler flags.
         '''
 
         params: List[Union[Path, str]] = [self._compile_flag]
-        if openmp:
+        if config.openmp:
             params.append(self.openmp_flag)
         if add_flags:
             if self.openmp_flag in add_flags:
@@ -319,14 +321,15 @@ class FortranCompiler(Compiler):
 
     def compile_file(self, input_file: Path,
                      output_file: Path,
-                     openmp: bool,
+                     config: BuildConfig,
                      add_flags: Union[None, List[str]] = None,
                      syntax_only: Optional[bool] = False):
         '''Compiles a file.
 
         :param input_file: the name of the input file.
         :param output_file: the name of the output file.
-        :param openmp: if compilation should be done with OpenMP.
+        :param config: The BuildConfig, from which compiler profile and OpenMP
+            status are taken.
         :param add_flags: additional flags for the compiler.
         :param syntax_only: if set, the compiler will only do
             a syntax check
@@ -348,7 +351,7 @@ class FortranCompiler(Compiler):
         if self._module_folder_flag and self._module_output_path:
             params.append(self._module_folder_flag)
             params.append(self._module_output_path)
-        super().compile_file(input_file, output_file, openmp=openmp,
+        super().compile_file(input_file, output_file, config=config,
                              add_flags=params)
 
 
