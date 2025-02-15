@@ -32,6 +32,7 @@ class TestLinkExe:
             tool_box=tool_box,
             mpi=False,
             openmp=False,
+            profile="default"
         )
         config.artefact_store[ArtefactSet.OBJECT_FILES] = \
             {'foo': {'foo.o', 'bar.o'}}

@@ -124,4 +124,4 @@ def link_shared_object(config, output_fpath: str, flags=None,
     objects = target_objects[None]
     out_name = Template(output_fpath).substitute(output=config.build_output)
     linker.add_post_lib_flags(flags)
-    linker.link(objects, out_name, openmp=config.openmp)
+    linker.link(objects, out_name, config=config)

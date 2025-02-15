@@ -27,7 +27,8 @@ def test_run(tool_box):
         build_output=Path("workspace"),
         artefact_store=ArtefactStore(),
         openmp=False,
-        tool_box=tool_box
+        tool_box=tool_box,
+        profile="default"
     )
     config.artefact_store[ArtefactSet.OBJECT_FILES] = \
         {None: {'foo.o', 'bar.o'}}
