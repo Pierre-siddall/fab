@@ -40,7 +40,7 @@ class CompilerWrapper(Compiler):
             mpi=mpi,
             availability_option=self._compiler.availability_option)
 
-    def get_version(self) -> Tuple[int, ...]:
+    def get_version(self) -> Tuple[int]:
         """Determines the version of the compiler. The implementation in the
         compiler wrapper additionally ensures that the wrapper compiler and
         compiler wrapper report both the same version. This verifies that the
@@ -57,6 +57,7 @@ class CompilerWrapper(Compiler):
             have different version numbers.
         """
 
+        self._version: Optional[Tuple[int]]
         if self._version is not None:
             return self._version
 

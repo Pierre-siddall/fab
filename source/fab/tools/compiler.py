@@ -12,7 +12,7 @@ import os
 import re
 from pathlib import Path
 import warnings
-from typing import List, Optional, Tuple, Union
+from typing import cast, List, Optional, Tuple, Union
 import zlib
 
 from fab.tools.category import Category
@@ -59,7 +59,7 @@ class Compiler(CompilerSuiteTool):
                  availability_option: Optional[Union[str, List[str]]] = None):
         super().__init__(name, exec_name, suite, category=category,
                          availability_option=availability_option)
-        self._version: Union[Tuple[int, ...], None] = None
+        self._version: Union[Tuple[int], None] = None
         self._mpi = mpi
         self._compile_flag = compile_flag if compile_flag else "-c"
         self._output_flag = output_flag if output_flag else "-o"
@@ -149,7 +149,7 @@ class Compiler(CompilerSuiteTool):
             self.logger.error(f'Error getting compiler version: {err}')
             return False
 
-    def get_version(self) -> Tuple[int, ...]:
+    def get_version(self) -> Tuple[int]:
         """
         Try to get the version of the given compiler.
 
@@ -178,7 +178,9 @@ class Compiler(CompilerSuiteTool):
         version_string = matches.groups()[0]
         # Expect the version to be dot-separated integers.
         try:
-            version = tuple(int(x) for x in version_string.split('.'))
+            # Make mypy happy:
+            version = cast(Tuple[int],
+                           tuple(int(x) for x in version_string.split('.')))
         except ValueError as err:
             raise RuntimeError(f"Unexpected version output format for "
                                f"compiler '{self.name}'. Should be numeric "
