@@ -98,12 +98,11 @@ class ProfileFlags:
     def __init__(self):
         # Stores the flags for each profile mode. The key is the (lower case)
         # name of the profile mode, and it contains a list of flags
-        self._profiles: Dict[str, Flags] = {}
+        self._profiles: Dict[str, Flags] = {"": Flags()}
 
         # This dictionary stores an optional inheritance, where one mode
         # 'inherits' the flags from a different mode (recursively)
         self._inherit_from: Dict[str, str] = {}
-        self.define_profile("default")
 
     def __getitem__(self, profile: str) -> List[str]:
         profile = profile.lower()
@@ -133,15 +132,17 @@ class ProfileFlags:
             self._inherit_from[name.lower()] = inherit_from.lower()
 
     def add_flags(self,
-                  profile: str,
-                  new_flags: Union[str, List[str]]):
+                  new_flags: Union[str, List[str]],
+                  profile: Optional[str] = None):
         '''Adds the specified flags to the list of flags.
 
         :param new_flags: A single string or list of strings which are the
             flags to be added.
         '''
+        if profile is None:
+            profile = ""
 
-        if not profile.lower() in self._profiles:
+        if profile.lower() not in self._profiles:
             raise KeyError(f"add_flags: Profile '{profile}' is not defined.")
 
         if isinstance(new_flags, str):

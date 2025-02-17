@@ -19,7 +19,7 @@ import subprocess
 from typing import Dict, List, Optional, Sequence, Union
 
 from fab.tools.category import Category
-from fab.tools.flags import Flags
+from fab.tools.flags import ProfileFlags
 
 
 class Tool:
@@ -40,7 +40,7 @@ class Tool:
         self._logger = logging.getLogger(__name__)
         self._name = name
         self._exec_name = str(exec_name)
-        self._flags = Flags()
+        self._flags = ProfileFlags()
         self._category = category
         if availability_option:
             self._availability_option = availability_option
@@ -118,7 +118,7 @@ class Tool:
 
     def get_flags(self):
         ''':returns: the flags to be used with this tool.'''
-        return self._flags
+        return self._flags[""]
 
     def add_flags(self, new_flags: Union[str, List[str]]):
         '''Adds the specified flags to the list of flags.

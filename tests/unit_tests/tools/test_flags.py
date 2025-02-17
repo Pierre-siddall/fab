@@ -78,9 +78,9 @@ def test_profile_flags():
     pf = ProfileFlags()
     pf.define_profile("base")
     assert pf["base"] == []
-    pf.add_flags("base", "-base")
+    pf.add_flags("-base", "base")
     assert pf["base"] == ["-base"]
-    pf.add_flags("base", ["-base2", "-base3"])
+    pf.add_flags(["-base2", "-base3"], "base")
     assert pf["base"] == ["-base", "-base2", "-base3"]
 
 
@@ -89,17 +89,17 @@ def test_profile_flags_inheriting():
     pf = ProfileFlags()
     pf.define_profile("base")
     assert pf["base"] == []
-    pf.add_flags("base", "-base")
+    pf.add_flags("-base", "base")
     assert pf["base"] == ["-base"]
 
     pf.define_profile("derived", "base")
     assert pf["derived"] == ["-base"]
-    pf.add_flags("derived", "-derived")
+    pf.add_flags("-derived", "derived")
     assert pf["derived"] == ["-base", "-derived"]
 
     pf.define_profile("derived2", "derived")
     assert pf["derived2"] == ["-base", "-derived"]
-    pf.add_flags("derived2", "-derived2")
+    pf.add_flags("-derived2", "derived2")
     assert pf["derived2"] == ["-base", "-derived", "-derived2"]
 
 
@@ -108,7 +108,7 @@ def test_profile_flags_removing():
     pf = ProfileFlags()
     pf.define_profile("base")
     assert pf["base"] == []
-    pf.add_flags("base", ["-base1", "-base2"])
+    pf.add_flags(["-base1", "-base2"], "base")
     warn_message = "Removing managed flag '-base1'."
     with pytest.warns(UserWarning, match=warn_message):
         pf.remove_flag("base", "-base1")
@@ -119,7 +119,7 @@ def test_profile_flags_checksum():
     '''Tests computation of the checksum.'''
     pf = ProfileFlags()
     pf.define_profile("base")
-    pf.add_flags("base", ['one', 'two', 'three', 'four'])
+    pf.add_flags(['one', 'two', 'three', 'four'], "base")
     assert pf.checksum("base") == 3011366051
 
 
@@ -134,7 +134,7 @@ def test_profile_flags_errors_invalid_profile_name():
     assert "Profile 'base' is already defined." in str(err.value)
 
     with pytest.raises(KeyError) as err:
-        pf.add_flags("does not exist", [])
+        pf.add_flags([], "does not exist")
     assert ("add_flags: Profile 'does not exist' is not defined."
             in str(err.value))
 

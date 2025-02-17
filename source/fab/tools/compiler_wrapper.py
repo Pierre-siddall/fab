@@ -88,7 +88,7 @@ class CompilerWrapper(Compiler):
 
     def get_flags(self):
         ''':returns: the flags to be used with this tool.'''
-        return Flags(self._compiler.get_flags() + self._flags)
+        return Flags(self._compiler.get_flags() + self._flags[""])
 
     @property
     def profile_flags(self) -> ProfileFlags:
