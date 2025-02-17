@@ -27,7 +27,7 @@ def test_compiler():
     assert cc._compile_flag == "-c"
     assert cc.output_flag == "-o"
     # pylint: disable-next=use-implicit-booleaness-not-comparison
-    assert cc.flags == []
+    assert cc.get_flags() == []
     assert cc.suite == "gnu"
     assert not cc.mpi
     assert cc.openmp_flag == "-fopenmp"
@@ -39,7 +39,7 @@ def test_compiler():
     assert fc.category == Category.FORTRAN_COMPILER
     assert fc.suite == "gnu"
     # pylint: disable-next=use-implicit-booleaness-not-comparison
-    assert fc.flags == []
+    assert fc.get_flags() == []
     assert not fc.mpi
     assert fc.openmp_flag == "-fopenmp"
 
@@ -136,8 +136,8 @@ def test_compiler_with_env_fflags():
     with mock.patch.dict(os.environ, FFLAGS='--foo --bar'):
         cc = Gcc()
         fc = Gfortran()
-    assert cc.flags == ["--foo", "--bar"]
-    assert fc.flags == ["--foo", "--bar"]
+    assert cc.get_flags() == ["--foo", "--bar"]
+    assert fc.get_flags() == ["--foo", "--bar"]
 
 
 def test_compiler_syntax_only():

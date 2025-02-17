@@ -27,7 +27,7 @@ def test_linker(mock_c_compiler, mock_fortran_compiler):
     assert linker.name == "linker-mock_c_compiler"
     assert linker.exec_name == "mock_c_compiler.exe"
     assert linker.suite == "suite"
-    assert linker.flags == []
+    assert linker.get_flags() == []
     assert linker.output_flag == "-o"
 
     assert mock_fortran_compiler.category == Category.FORTRAN_COMPILER
@@ -38,7 +38,7 @@ def test_linker(mock_c_compiler, mock_fortran_compiler):
     assert linker.name == "linker-mock_fortran_compiler"
     assert linker.exec_name == "mock_fortran_compiler.exe"
     assert linker.suite == "suite"
-    assert linker.flags == []
+    assert linker.get_flags() == []
 
 
 @pytest.mark.parametrize("mpi", [True, False])
@@ -75,7 +75,7 @@ def test_linker_gets_ldflags(mock_c_compiler):
     """Tests that the linker retrieves env.LDFLAGS"""
     with mock.patch.dict("os.environ", {"LDFLAGS": "-lm"}):
         linker = Linker(compiler=mock_c_compiler)
-    assert "-lm" in linker.flags
+    assert "-lm" in linker.get_flags()
 
 
 def test_linker_check_available(mock_c_compiler):
@@ -274,7 +274,7 @@ def test_compiler_linker_add_compiler_flag(mock_c_compiler, mock_config):
 
     mock_c_compiler = mock_config.tool_box[Category.C_COMPILER]
     linker = Linker(compiler=mock_c_compiler)
-    mock_c_compiler.flags.append("-my-flag")
+    mock_c_compiler.add_flags("-my-flag")
     mock_result = mock.Mock(returncode=0)
     mock_config._openmp = False
     with mock.patch('fab.tools.tool.subprocess.run',

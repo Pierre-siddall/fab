@@ -82,11 +82,11 @@ def test_tool_flags():
     '''Test that flags work as expected'''
     tool = Tool("gfortran", "gfortran", Category.FORTRAN_COMPILER)
     # pylint: disable-next=use-implicit-booleaness-not-comparison
-    assert tool.flags == []
+    assert tool.get_flags() == []
     tool.add_flags("-a")
-    assert tool.flags == ["-a"]
+    assert tool.get_flags() == ["-a"]
     tool.add_flags(["-b", "-c"])
-    assert tool.flags == ["-a", "-b", "-c"]
+    assert tool.get_flags() == ["-a", "-b", "-c"]
 
 
 class TestToolRun:

@@ -253,12 +253,12 @@ def test_compiler_wrapper_flags_independent():
     gcc = Gcc()
     mpicc = Mpicc(gcc)
     # pylint: disable=use-implicit-booleaness-not-comparison
-    assert gcc.flags == []
-    assert mpicc.flags == []
+    assert gcc.get_flags() == []
+    assert mpicc.get_flags() == []
     # Setting flags in gcc must become visible in the wrapper compiler:
     gcc.add_flags(["-a", "-b"])
-    assert gcc.flags == ["-a", "-b"]
-    assert mpicc.flags == ["-a", "-b"]
+    assert gcc.get_flags() == ["-a", "-b"]
+    assert mpicc.get_flags() == ["-a", "-b"]
     assert mpicc.openmp_flag == gcc.openmp_flag
 
     # Test  a compiler wrapper correctly queries the wrapper compiler for
@@ -275,11 +275,11 @@ def test_compiler_wrapper_flags_independent():
 
     # Adding flags to the wrapper should not affect the wrapped compiler:
     mpicc.add_flags(["-d", "-e"])
-    assert gcc.flags == ["-a", "-b"]
+    assert gcc.get_flags() == ["-a", "-b"]
     # And the compiler wrapper should reports the wrapped compiler's flag
     # followed by the wrapper flag (i.e. the wrapper flag can therefore
     # overwrite the wrapped compiler's flags)
-    assert mpicc.flags == ["-a", "-b", "-d", "-e"]
+    assert mpicc.get_flags() == ["-a", "-b", "-d", "-e"]
 
 
 def test_compiler_wrapper_flags_with_add_arg(mock_config):

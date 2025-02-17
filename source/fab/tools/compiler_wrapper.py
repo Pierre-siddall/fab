@@ -86,10 +86,9 @@ class CompilerWrapper(Compiler):
         ''':returns: the compiler that is wrapped by this CompilerWrapper.'''
         return self._compiler
 
-    @property
-    def flags(self) -> Flags:
+    def get_flags(self):
         ''':returns: the flags to be used with this tool.'''
-        return Flags(self._compiler.flags + self._flags)
+        return Flags(self._compiler.get_flags() + self._flags)
 
     @property
     def profile_flags(self) -> ProfileFlags:
@@ -124,7 +123,8 @@ class CompilerWrapper(Compiler):
         ''':returns; the ProfileFlags for the given profile, combined
         from the wrapped compiler and this wrapper.
         :param profile: the profile to use.'''
-        return self._compiler.get_profile_flags(profile) + self._profile_flags[profile]
+        return (self._compiler.get_profile_flags(profile) +
+                self._profile_flags[profile])
 
     def set_module_output_path(self, path: Path):
         '''Sets the output path for modules.
@@ -174,7 +174,7 @@ class CompilerWrapper(Compiler):
             # which also supports the syntax_only flag anyway)
             self._compiler = cast(FortranCompiler, self._compiler)
             self._compiler.compile_file(input_file, output_file, config=config,
-                                        add_flags=self.flags + add_flags,
+                                        add_flags=self.get_flags() + add_flags,
                                         syntax_only=syntax_only,
                                         )
         else:
@@ -182,7 +182,7 @@ class CompilerWrapper(Compiler):
                 raise RuntimeError(f"Syntax-only cannot be used with compiler "
                                    f"'{self.name}'.")
             self._compiler.compile_file(input_file, output_file, config=config,
-                                        add_flags=self.flags+add_flags
+                                        add_flags=self.get_flags()+add_flags
                                         )
         self._compiler.change_exec_name(orig_compiler_name)
 

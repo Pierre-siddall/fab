@@ -210,7 +210,7 @@ class Linker(CompilerSuiteTool):
 
         # TODO: For now we pick up both flags from ProfileFlags and the
         # standard ones from Tool.
-        params.extend(self._compiler.flags)
+        params.extend(self._compiler.get_flags())
         params.extend(self._compiler.get_profile_flags(config.profile))
 
         if config.openmp:

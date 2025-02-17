@@ -116,8 +116,7 @@ class Tool:
         ''':returns: the category of this tool.'''
         return self._category
 
-    @property
-    def flags(self) -> Flags:
+    def get_flags(self):
         ''':returns: the flags to be used with this tool.'''
         return self._flags
 
@@ -160,8 +159,7 @@ class Tool:
         :raises RuntimeError: if the code is not available.
         :raises RuntimeError: if the return code of the executable is not 0.
         """
-
-        command = [self.exec_name] + self.flags
+        command = [self.exec_name] + self.get_flags()
         if additional_parameters:
             if isinstance(additional_parameters, str):
                 command.append(additional_parameters)
