@@ -96,7 +96,7 @@ class Compiler(CompilerSuiteTool):
         return (zlib.crc32(self.name.encode()) +
                 zlib.crc32(self.get_version_string().encode()))
 
-    def get_flags(self, profile: Optional[str] = None) -> list[str]:
+    def get_flags(self, profile: Optional[str] = None) -> List[str]:
         '''Determines the flags to be used. We should always add $FFLAGS,so
         we always add them in here.
 
