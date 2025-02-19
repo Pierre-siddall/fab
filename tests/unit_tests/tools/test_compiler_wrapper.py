@@ -225,8 +225,7 @@ def test_compiler_wrapper_c_with_add_args(mock_config):
                            add_flags=["-O3"])
         mpicc.compiler.run.assert_called_with(
             cwd=Path('.'), profile="my_default",
-            additional_parameters=['-c', "-O3", 'a.f90',
-                                                  '-o', 'a.o'])
+            additional_parameters=['-c', "-O3", 'a.f90', '-o', 'a.o'])
         # Invoke C compiler with syntax-only flag (which is only supported
         # by Fortran compilers), which should raise an exception.
         with pytest.raises(RuntimeError) as err:

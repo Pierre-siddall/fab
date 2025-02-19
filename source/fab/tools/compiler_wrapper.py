@@ -14,7 +14,6 @@ from typing import cast, List, Optional, Tuple, Union
 from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler, FortranCompiler
-from fab.tools.flags import ProfileFlags
 
 
 class CompilerWrapper(Compiler):

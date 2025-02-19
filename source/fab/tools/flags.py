@@ -100,7 +100,7 @@ class ProfileFlags:
     that do not need a profile.
     '''
 
-    def __init__(self):
+    def __init__(self: "ProfileFlags"):
         # Stores the flags for each profile mode. The key is the (lower case)
         # name of the profile mode, and it contains a list of flags
         self._profiles: Dict[str, Flags] = {"": Flags()}
