@@ -78,6 +78,7 @@ class TestCompileC:
         # ensure it made the correct command-line call from the child process
         compiler.run.assert_called_with(
             cwd=Path(config.source_root),
+            profile="",
             additional_parameters=['-c', '-Denv_flag', '-I', 'foo/include',
                                    '-Dhello', 'foo.c',
                                    '-o', str(config.prebuild_folder /

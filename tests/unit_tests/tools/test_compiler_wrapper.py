@@ -180,10 +180,10 @@ def test_compiler_wrapper_fortran_with_add_args(mock_config):
                                 syntax_only=True)
         # Notice that "-J/b" has been removed
         mpif90.compiler.run.assert_called_with(
-            cwd=Path('.'), additional_parameters=['-c', "-O3",
-                                                  '-fsyntax-only',
-                                                  '-J', '/module_out',
-                                                  'a.f90', '-o', 'a.o'])
+            cwd=Path('.'), profile="",
+            additional_parameters=['-c', "-O3", '-fsyntax-only',
+                                   '-J', '/module_out',
+                                   'a.f90', '-o', 'a.o'])
 
 
 def test_compiler_wrapper_fortran_add_args_unnecessary_openmp(mock_config):
@@ -202,6 +202,7 @@ def test_compiler_wrapper_fortran_add_args_unnecessary_openmp(mock_config):
                                 config=mock_config, syntax_only=True)
             mpif90.compiler.run.assert_called_with(
                 cwd=Path('.'),
+                profile="",
                 additional_parameters=['-c', '-fopenmp', '-fopenmp', '-O3',
                                        '-fsyntax-only', '-J', '/module_out',
                                        'a.f90', '-o', 'a.o'])
@@ -216,13 +217,15 @@ def test_compiler_wrapper_c_with_add_args(mock_config):
     mpicc = ToolRepository().get_tool(Category.C_COMPILER,
                                       "mpicc-gcc")
     mock_config._openmp = False
+    mock_config._profile = "my_default"
     with mock.patch.object(mpicc.compiler, "run", mock.MagicMock()):
         # Normal invoke of the C compiler, make sure add_flags are
         # passed through:
         mpicc.compile_file(Path("a.f90"), "a.o", config=mock_config,
                            add_flags=["-O3"])
         mpicc.compiler.run.assert_called_with(
-            cwd=Path('.'), additional_parameters=['-c', "-O3", 'a.f90',
+            cwd=Path('.'), profile="my_default",
+            additional_parameters=['-c', "-O3", 'a.f90',
                                                   '-o', 'a.o'])
         # Invoke C compiler with syntax-only flag (which is only supported
         # by Fortran compilers), which should raise an exception.
@@ -243,6 +246,7 @@ def test_compiler_wrapper_c_with_add_args(mock_config):
                                config=mock_config)
             mpicc.compiler.run.assert_called_with(
                 cwd=Path('.'),
+                profile="my_default",
                 additional_parameters=['-c', '-fopenmp', '-fopenmp', '-O3',
                                        'a.f90', '-o', 'a.o'])
 
@@ -294,11 +298,13 @@ def test_compiler_wrapper_flags_with_add_arg(mock_config):
     # actual compiler call: first the wrapper compiler flag, then
     # the wrapper flag, then additional flags
     mock_config._openmp = True
+    mock_config._profile = "default"
     with mock.patch.object(mpicc.compiler, "run", mock.MagicMock()):
         mpicc.compile_file(Path("a.f90"), "a.o", add_flags=["-f"],
                            config=mock_config)
         mpicc.compiler.run.assert_called_with(
                 cwd=Path('.'),
+                profile="default",
                 additional_parameters=["-c", "-fopenmp", "-a", "-b", "-d",
                                        "-e", "-f", "a.f90", "-o", "a.o"])
 
@@ -318,7 +324,8 @@ def test_compiler_wrapper_flags_without_add_arg(mock_config):
         # Test if no add_flags are specified:
         mpicc.compile_file(Path("a.f90"), "a.o", config=mock_config)
         mpicc.compiler.run.assert_called_with(
-                cwd=Path('.'),
+                cwd=Path("."),
+                profile="",
                 additional_parameters=["-c", "-fopenmp", "-a", "-b", "-d",
                                        "-e", "a.f90", "-o", "a.o"])
 

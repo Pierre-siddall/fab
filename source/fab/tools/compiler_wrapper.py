@@ -14,7 +14,7 @@ from typing import cast, List, Optional, Tuple, Union
 from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler, FortranCompiler
-from fab.tools.flags import Flags, ProfileFlags
+from fab.tools.flags import ProfileFlags
 
 
 class CompilerWrapper(Compiler):
@@ -86,15 +86,6 @@ class CompilerWrapper(Compiler):
         ''':returns: the compiler that is wrapped by this CompilerWrapper.'''
         return self._compiler
 
-    def get_flags(self):
-        ''':returns: the flags to be used with this tool.'''
-        return Flags(self._compiler.get_flags() + self._flags[""])
-
-    @property
-    def profile_flags(self) -> ProfileFlags:
-        ''':returns: the flags to be used with this tool.'''
-        return self._compiler.profile_flags
-
     @property
     def suite(self) -> str:
         ''':returns: the compiler suite of this tool.'''
@@ -119,12 +110,12 @@ class CompilerWrapper(Compiler):
         raise RuntimeError(f"Compiler '{self._compiler.name}' has "
                            f"no has_syntax_only.")
 
-    def get_profile_flags(self, profile: str) -> List[str]:
+    def get_flags(self, profile: Optional[str] = None) -> List[str]:
         ''':returns; the ProfileFlags for the given profile, combined
         from the wrapped compiler and this wrapper.
         :param profile: the profile to use.'''
-        return (self._compiler.get_profile_flags(profile) +
-                self._profile_flags[profile])
+        return (self._compiler.get_flags(profile) +
+                super().get_flags(profile))
 
     def set_module_output_path(self, path: Path):
         '''Sets the output path for modules.

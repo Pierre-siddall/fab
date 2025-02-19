@@ -17,7 +17,7 @@ import zlib
 
 from fab.build_config import BuildConfig
 from fab.tools.category import Category
-from fab.tools.flags import Flags, ProfileFlags
+from fab.tools.flags import Flags
 from fab.tools.tool import CompilerSuiteTool
 
 
@@ -65,19 +65,7 @@ class Compiler(CompilerSuiteTool):
         self._compile_flag = compile_flag if compile_flag else "-c"
         self._output_flag = output_flag if output_flag else "-o"
         self._openmp_flag = openmp_flag if openmp_flag else ""
-        self.add_flags(os.getenv("FFLAGS", "").split())
-        self._profile_flags = ProfileFlags()
         self._version_regex = version_regex
-
-    @property
-    def profile_flags(self) -> ProfileFlags:
-        ''':returns; the ProfileFlags for this compiler.'''
-        return self._profile_flags
-
-    def get_profile_flags(self, profile: str) -> List[str]:
-        ''':returns; the ProfileFlags for the given profile.
-        :param profile: the profile to use.'''
-        return self._profile_flags[profile]
 
     @property
     def mpi(self) -> bool:
@@ -108,6 +96,14 @@ class Compiler(CompilerSuiteTool):
         return (zlib.crc32(self.name.encode()) +
                 zlib.crc32(self.get_version_string().encode()))
 
+    def get_flags(self, profile: Optional[str] = None) -> list[str]:
+        '''Determines the flags to be used. We should always add $FFLAGS,so
+        we always add them in here.
+
+        :returns: the flags to be used with this tool.'''
+        fflags = os.getenv("FFLAGS", "").split()
+        return self._flags[profile] + fflags
+
     def compile_file(self, input_file: Path,
                      output_file: Path,
                      config: BuildConfig,
@@ -127,6 +123,7 @@ class Compiler(CompilerSuiteTool):
         '''
 
         params: List[Union[Path, str]] = [self._compile_flag]
+
         if config.openmp:
             params.append(self.openmp_flag)
         if add_flags:
@@ -137,12 +134,10 @@ class Compiler(CompilerSuiteTool):
                     f"instead.")
             params += add_flags
 
-        params.extend(self.get_profile_flags(config.profile))
-
         params.extend([input_file.name,
                       self._output_flag, str(output_file)])
 
-        return self.run(cwd=input_file.parent,
+        return self.run(profile=config.profile, cwd=input_file.parent,
                         additional_parameters=params)
 
     def check_available(self) -> bool:

@@ -50,7 +50,7 @@ class TestLinkExe:
                                             output_flag=None, openmp_flag=None)
 
             linker = Linker(compiler=mock_compiler)
-            # Mark the linker as available to it can be added to the tool box
+            # Mark the linker as available so it can be added to the tool box
             linker._is_available = True
 
             # Add a custom library to the linker

@@ -44,7 +44,7 @@ class BuildConfig():
                  tool_box: ToolBox,
                  mpi: bool = False,
                  openmp: bool = False,
-                 profile: str = "default",
+                 profile: Optional[str] = None,
                  multiprocessing: bool = True,
                  n_procs: Optional[int] = None,
                  reuse_artefacts: bool = False,
@@ -89,7 +89,11 @@ class BuildConfig():
         self._tool_box = tool_box
         self._mpi = mpi
         self._openmp = openmp
-        self._profile = profile
+        if profile is None:
+            # An empty string is used for non-profiled flags
+            self._profile = ""
+        else:
+            self._profile = profile
         self.two_stage = two_stage
         self.verbose = verbose
         compiler = tool_box.get_tool(Category.FORTRAN_COMPILER, mpi=mpi,

@@ -381,12 +381,11 @@ def test_linker_profile_flags_inheriting(mock_c_compiler):
     linker = Linker(mock_c_compiler_wrapper)
     linker_wrapper = Linker(mock_c_compiler_wrapper, linker=linker)
     count = 0
-    for pf in [mock_c_compiler._profile_flags,
-               mock_c_compiler_wrapper._profile_flags]:
-        pf.define_profile("base")
-        pf.define_profile("derived", "base")
-        pf.add_flags(f"-f{count}", "base")
-        pf.add_flags(f"-f{count+1}", "derived")
+    for compiler in [mock_c_compiler, mock_c_compiler_wrapper]:
+        compiler.define_profile("base")
+        compiler.define_profile("derived", "base")
+        compiler.add_flags(f"-f{count}", "base")
+        compiler.add_flags(f"-f{count+1}", "derived")
         count += 2
 
     # One set f1-f4 from the compiler wrapper, one from the wrapped linker

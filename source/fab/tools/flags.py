@@ -94,6 +94,11 @@ class Flags(list):
 
 
 class ProfileFlags:
+    '''A list of flags that support a 'profile' to be used. If no profile is
+    specified, it will use "" (empty string) as 'profile'. All functions take
+    an optional profile parameter, so this class can also be used for tool
+    that do not need a profile.
+    '''
 
     def __init__(self):
         # Stores the flags for each profile mode. The key is the (lower case)
@@ -104,7 +109,16 @@ class ProfileFlags:
         # 'inherits' the flags from a different mode (recursively)
         self._inherit_from: Dict[str, str] = {}
 
-    def __getitem__(self, profile: str) -> List[str]:
+    def __getitem__(self, profile: Optional[str] = None) -> List[str]:
+        '''Returns the flags for the requested profile. If profile is not
+        specified, the empty profile ("") will be used. It will also take
+        inheritance into account, so add flags (recursively) from inherited
+        profiles. The function will not raise an exception if the profile
+        is not defined, since it is entirely possible that flags are only
+        provided via inheritance, or that no flags at all might be required.
+        '''
+        if profile is None:
+            profile = ""
         profile = profile.lower()
 
         # First add any flags that we inherit. This will recursively call
@@ -124,6 +138,13 @@ class ProfileFlags:
     def define_profile(self,
                        name: str,
                        inherit_from: Optional[str] = None):
+        '''Defines a new profile name, and allows to specify if this new
+        profile inherit settings from an existing profile.
+
+        :param name: Name of the profile to define.
+        :param inherit_from: Optional name of a profile to inherit
+            settings from.
+        '''
         if name in self._profiles:
             raise KeyError(f"Profile '{name}' is already defined.")
         self._profiles[name.lower()] = Flags()

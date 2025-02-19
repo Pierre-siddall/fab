@@ -99,7 +99,7 @@ class Linker(CompilerSuiteTool):
             flags = self._linker.get_profile_flags(profile)[:]
         else:
             flags = []
-        return flags + self._compiler.get_profile_flags(profile)
+        return flags + self._compiler.get_flags(profile)
 
     def get_lib_flags(self, lib: str) -> List[str]:
         '''Gets the standard flags for a standard library
@@ -112,12 +112,12 @@ class Linker(CompilerSuiteTool):
         '''
         try:
             return self._lib_flags[lib]
-        except KeyError:
+        except KeyError as err:
             # If a lib is not defined here, but this is a wrapper around
             # another linker, return the result from the wrapped linker
             if self._linker:
                 return self._linker.get_lib_flags(lib)
-            raise RuntimeError(f"Unknown library name: '{lib}'")
+            raise RuntimeError(f"Unknown library name: '{lib}'") from err
 
     def add_lib_flags(self, lib: str, flags: List[str],
                       silent_replace: bool = False):
@@ -208,10 +208,7 @@ class Linker(CompilerSuiteTool):
 
         params: List[Union[str, Path]] = []
 
-        # TODO: For now we pick up both flags from ProfileFlags and the
-        # standard ones from Tool.
-        params.extend(self._compiler.get_flags())
-        params.extend(self._compiler.get_profile_flags(config.profile))
+        params.extend(self._compiler.get_flags(config.profile))
 
         if config.openmp:
             params.append(self._compiler.openmp_flag)

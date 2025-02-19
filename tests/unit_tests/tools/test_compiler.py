@@ -136,8 +136,8 @@ def test_compiler_with_env_fflags():
     with mock.patch.dict(os.environ, FFLAGS='--foo --bar'):
         cc = Gcc()
         fc = Gfortran()
-    assert cc.get_flags() == ["--foo", "--bar"]
-    assert fc.get_flags() == ["--foo", "--bar"]
+        assert cc.get_flags() == ["--foo", "--bar"]
+        assert fc.get_flags() == ["--foo", "--bar"]
 
 
 def test_compiler_syntax_only():
@@ -175,6 +175,7 @@ def test_compiler_without_openmp(mock_config):
     mock_config._openmp = False
     fc.compile_file(Path("a.f90"), "a.o", config=mock_config, syntax_only=True)
     fc.run.assert_called_with(cwd=Path('.'),
+                              profile='',
                               additional_parameters=['-c', '-fsyntax-only',
                                                      "-J", '/tmp', 'a.f90',
                                                      '-o', 'a.o', ])
@@ -191,9 +192,11 @@ def test_compiler_with_openmp(mock_config):
     fc.set_module_output_path("/tmp")
     fc.run = mock.Mock()
     mock_config._openmp = True
+    mock_config._profile = "test_profile"
     fc.compile_file(Path("a.f90"), "a.o", config=mock_config,
                     syntax_only=False)
     fc.run.assert_called_with(cwd=Path('.'),
+                              profile='test_profile',
                               additional_parameters=['-c', '-fopenmp',
                                                      "-J", '/tmp', 'a.f90',
                                                      '-o', 'a.o', ])
@@ -209,6 +212,7 @@ def test_compiler_module_output(mock_config):
     mock_config._openmp = False
     fc.compile_file(Path("a.f90"), "a.o", config=mock_config, syntax_only=True)
     fc.run.assert_called_with(cwd=PosixPath('.'),
+                              profile='',
                               additional_parameters=['-c', '-J', '/module_out',
                                                      'a.f90', '-o', 'a.o'])
 
@@ -223,12 +227,14 @@ def test_compiler_with_add_args(mock_config):
     assert fc._module_output_path == "/module_out"
     fc.run = mock.MagicMock()
     mock_config._openmp = False
+    mock_config._profile = "default"
     with pytest.warns(UserWarning, match="Removing managed flag"):
         fc.compile_file(Path("a.f90"), "a.o", add_flags=["-J/b", "-O3"],
                         config=mock_config, syntax_only=True)
     # Notice that "-J/b" has been removed
     fc.run.assert_called_with(cwd=PosixPath('.'),
-                              additional_parameters=['-c', "-O3",
+                              profile='default',
+                              additional_parameters=['-c', '-O3',
                                                      '-J', '/module_out',
                                                      'a.f90', '-o', 'a.o'])
     mock_config._openmp = True
