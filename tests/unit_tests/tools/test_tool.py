@@ -77,9 +77,21 @@ def test_tool_is_available():
                 availability_option="am_i_here")
     assert tool.availability_option == "am_i_here"
 
+    # Test that the actual check_available function works. Return 0 to
+    # indicate no error when running the tool:
+    mock_result = mock.Mock(returncode=0)
+    with mock.patch('fab.tools.tool.subprocess.run',
+                    return_value=mock_result) as tool_run:
+        assert tool.check_available()
+    tool_run.assert_called_once_with(['gfortran', 'am_i_here'],
+                                     capture_output=True, env=None,
+                                     cwd=None, check=False)
+    with mock.patch.object(tool, "run", side_effect=RuntimeError("")):
+        assert not tool.check_available()
 
-def test_tool_flags():
-    '''Test that flags work as expected'''
+
+def test_tool_flags_no_profile():
+    '''Test that flags without using a profile work as expected.'''
     tool = Tool("gfortran", "gfortran", Category.FORTRAN_COMPILER)
     # pylint: disable-next=use-implicit-booleaness-not-comparison
     assert tool.get_flags() == []
