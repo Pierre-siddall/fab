@@ -14,7 +14,7 @@ from unittest import mock
 
 import pytest
 
-from fab.tools import Category, CompilerSuiteTool, Tool
+from fab.tools import Category, CompilerSuiteTool, ProfileFlags, Tool
 
 
 def test_tool_constructor():
@@ -99,6 +99,30 @@ def test_tool_flags_no_profile():
     assert tool.get_flags() == ["-a"]
     tool.add_flags(["-b", "-c"])
     assert tool.get_flags() == ["-a", "-b", "-c"]
+
+
+def test_tool_profiles():
+    '''Test that profiles work as expected. These tests use internal
+    implementation details of ProfileFlags, but we need to test that the
+    exposed flag-related API works as expected
+
+    '''
+    tool = Tool("gfortran", "gfortran", Category.FORTRAN_COMPILER)
+    # Make sure by default we get ProfileFlags
+    assert isinstance(tool._flags, ProfileFlags)
+    assert tool.get_flags() == []
+
+    # Define a profile with no inheritance
+    tool.define_profile("mode1")
+    assert tool.get_flags("mode1") == []
+    tool.add_flags("-flag1", "mode1")
+    assert tool.get_flags("mode1") == ["-flag1"]
+
+    # Define a profile with inheritance
+    tool.define_profile("mode2", "mode1")
+    assert tool.get_flags("mode2") == ["-flag1"]
+    tool.add_flags("-flag2", "mode2")
+    assert tool.get_flags("mode2") == ["-flag1", "-flag2"]
 
 
 class TestToolRun:
