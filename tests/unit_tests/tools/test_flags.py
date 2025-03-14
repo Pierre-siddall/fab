@@ -10,6 +10,7 @@
 import pytest
 
 from fab.tools import Flags, ProfileFlags
+from fab.util import string_checksum
 
 
 def test_flags_constructor():
@@ -68,12 +69,12 @@ def test_remove_flags():
 
 def test_flags_checksum():
     '''Tests computation of the checksum.'''
-    # I think this is a poor testing pattern.
-    flags = Flags(['one', 'two', 'three', 'four'])
-    assert flags.checksum() == 3011366051
+    list_of_flags = ['one', 'two', 'three', 'four']
+    flags = Flags(list_of_flags)
+    assert flags.checksum() == string_checksum(str(list_of_flags))
 
 
-def test_profile_flags():
+def test_profile_flags_with_profile():
     '''Tests adding flags.'''
     pf = ProfileFlags()
     pf.define_profile("base")
@@ -82,6 +83,16 @@ def test_profile_flags():
     assert pf["base"] == ["-base"]
     pf.add_flags(["-base2", "-base3"], "base")
     assert pf["base"] == ["-base", "-base2", "-base3"]
+
+
+def test_profile_flags_without_profile():
+    '''Tests adding flags.'''
+    pf = ProfileFlags()
+    assert pf[""] == []
+    pf.add_flags("-base")
+    assert pf[""] == ["-base"]
+    pf.add_flags(["-base2", "-base3"])
+    assert pf[""] == ["-base", "-base2", "-base3"]
 
 
 def test_profile_flags_inheriting():
@@ -111,16 +122,27 @@ def test_profile_flags_removing():
     pf.add_flags(["-base1", "-base2"], "base")
     warn_message = "Removing managed flag '-base1'."
     with pytest.warns(UserWarning, match=warn_message):
-        pf.remove_flag("base", "-base1")
+        pf.remove_flag("-base1", "base")
     assert pf["base"] == ["-base2"]
+
+    pf.add_flags(["-base1", "-base2"])
+    warn_message = "Removing managed flag '-base1'."
+    with pytest.warns(UserWarning, match=warn_message):
+        pf.remove_flag("-base1")
+    assert pf[""] == ["-base2"]
 
 
 def test_profile_flags_checksum():
     '''Tests computation of the checksum.'''
     pf = ProfileFlags()
     pf.define_profile("base")
-    pf.add_flags(['one', 'two', 'three', 'four'], "base")
-    assert pf.checksum("base") == 3011366051
+    list_of_flags = ['one', 'two', 'three', 'four']
+    pf.add_flags(list_of_flags, "base")
+    assert pf.checksum("base") == string_checksum(str(list_of_flags))
+
+    list_of_flags_new = ['one', 'two', 'three', 'four', "five"]
+    pf.add_flags(list_of_flags_new)
+    assert pf.checksum() == string_checksum(str(list_of_flags_new))
 
 
 def test_profile_flags_errors_invalid_profile_name():
@@ -134,12 +156,12 @@ def test_profile_flags_errors_invalid_profile_name():
     assert "Profile 'base' is already defined." in str(err.value)
 
     with pytest.raises(KeyError) as err:
-        pf.add_flags([], "does not exist")
+        pf.add_flags(["-some-flag"], "does not exist")
     assert ("add_flags: Profile 'does not exist' is not defined."
             in str(err.value))
 
     with pytest.raises(KeyError) as err:
-        pf.remove_flag("does not exist", [])
+        pf.remove_flag("-some-flag", "does not exist")
     assert ("remove_flag: Profile 'does not exist' is not defined."
             in str(err.value))
 

@@ -51,7 +51,7 @@ class Flags(list):
             self.extend(new_flags)
 
     def remove_flag(self, remove_flag: str, has_parameter: bool = False):
-        '''Removes all occurrences of `remove_flag` in flags`.
+        '''Removes all occurrences of `remove_flag` in flags.
         If has_parameter is defined, the next entry in flags will also be
         removed, and if this object contains this flag+parameter without space
         (e.g. `-J/tmp`), it will be correctly removed. Note that only the
@@ -96,7 +96,7 @@ class Flags(list):
 class ProfileFlags:
     '''A list of flags that support a 'profile' to be used. If no profile is
     specified, it will use "" (empty string) as 'profile'. All functions take
-    an optional profile parameter, so this class can also be used for tool
+    an optional profile parameter, so this class can also be used for tools
     that do not need a profile.
     '''
 
@@ -117,9 +117,10 @@ class ProfileFlags:
         is not defined, since it is entirely possible that flags are only
         provided via inheritance, or that no flags at all might be required.
         '''
-        if profile is None:
+        if not profile:
             profile = ""
-        profile = profile.lower()
+        else:
+            profile = profile.lower()
 
         # First add any flags that we inherit. This will recursively call
         # this __getitem__ to resolve inheritance chains.
@@ -162,37 +163,54 @@ class ProfileFlags:
         '''
         if profile is None:
             profile = ""
+        else:
+            profile = profile.lower()
 
-        if profile.lower() not in self._profiles:
+        if profile not in self._profiles:
             raise KeyError(f"add_flags: Profile '{profile}' is not defined.")
 
         if isinstance(new_flags, str):
             new_flags = [new_flags]
 
-        self._profiles[profile.lower()].add_flags(new_flags)
+        self._profiles[profile].add_flags(new_flags)
 
     def remove_flag(self,
-                    profile: str,
                     remove_flag: str,
+                    profile: Optional[str] = None,
                     has_parameter: bool = False):
-        '''Adds the specified flags to the list of flags.
+        '''Removes all occurrences of `remove_flag` in flags.
+        If `has_parameter` is defined, the next entry in flags will also be
+        removed, and if this object contains this flag+parameter without space
+        (e.g. `-J/tmp`), it will be correctly removed. Note that only the
+        flag itself must be specified, you cannot remove a flag only if a
+        specific parameter is given (i.e. `remove_flag="-J/tmp"` will not
+        work if this object contains `[...,"-J", "/tmp"]`).
 
-        :param new_flags: A single string or list of strings which are the
-            flags to be added.
+        :param remove_flag: the flag to remove
+        :param has_parameter: if the flag to remove takes a parameter
         '''
 
-        if not profile.lower() in self._profiles:
+        if not profile:
+            profile = ""
+        else:
+            profile = profile.lower()
+
+        if profile not in self._profiles:
             raise KeyError(f"remove_flag: Profile '{profile}' is not defined.")
 
-        self._profiles[profile.lower()].remove_flag(remove_flag,
-                                                    has_parameter)
+        self._profiles[profile].remove_flag(remove_flag, has_parameter)
 
-    def checksum(self, profile: str) -> str:
+    def checksum(self, profile: Optional[str] = None) -> str:
         """
         :returns: a checksum of the flags.
 
         """
-        if not profile.lower() in self._profiles:
+        if not profile:
+            profile = ""
+        else:
+            profile = profile.lower()
+
+        if profile not in self._profiles:
             raise KeyError(f"checksum: Profile '{profile}' is not defined.")
 
-        return self._profiles[profile.lower()].checksum()
+        return self._profiles[profile].checksum()
