@@ -146,7 +146,9 @@ class ProfileFlags:
                        name: str,
                        inherit_from: Optional[str] = None):
         '''Defines a new profile name, and allows to specify if this new
-        profile inherit settings from an existing profile.
+        profile inherit settings from an existing profile. If inherit_from
+        is specified, the newly defined profile will inherit from an existing
+        profile (including the default profile "").
 
         :param name: Name of the profile to define.
         :param inherit_from: Optional name of a profile to inherit
@@ -156,7 +158,10 @@ class ProfileFlags:
             raise KeyError(f"Profile '{name}' is already defined.")
         self._profiles[name.lower()] = Flags()
 
-        if inherit_from:
+        if inherit_from is not None:
+            if inherit_from not in self._profiles:
+                raise KeyError(f"Inherited profile '{inherit_from}' is "
+                               f"not defined.")
             self._inherit_from[name.lower()] = inherit_from.lower()
 
     def add_flags(self,

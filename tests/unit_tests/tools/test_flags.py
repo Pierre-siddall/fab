@@ -105,17 +105,32 @@ def test_profile_flags_without_profile():
         _ = pf["does_not_exist"]
     assert "Profile 'does_not_exist' is not defined" in str(err.value)
 
+    # Check that we get an exception if we try to inherit from a profile
+    # that does not exist
+    with pytest.raises(KeyError) as err:
+        _ = pf.define_profile("new_profile", "does_not_exist")
+    assert ("Inherited profile 'does_not_exist' is not defined."
+            in str(err.value))
+
+    # Test that inheriting from the default profile "" works
+    pf.define_profile("from_default", "")
+    assert pf._inherit_from["from_default"] == ""
+
 
 def test_profile_flags_inheriting():
     '''Tests adding flags.'''
     pf = ProfileFlags()
     pf.define_profile("base")
     assert pf["base"] == []
+    # And there should not be any inherited profile defined:
+    assert "base" not in pf._inherit_from
+
     pf.add_flags("-base", "base")
     assert pf["base"] == ["-base"]
 
     pf.define_profile("derived", "base")
     assert pf["derived"] == ["-base"]
+    assert pf._inherit_from["derived"] == "base"
     pf.add_flags("-derived", "derived")
     assert pf["derived"] == ["-base", "-derived"]
 
