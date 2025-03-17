@@ -57,7 +57,7 @@ class CompilerWrapper(Compiler):
             have different version numbers.
         """
 
-        self._version: Optional[Tuple[int]]
+        self._version: Optional[Tuple[int, ...]]
         if self._version is not None:
             return self._version
 

@@ -60,7 +60,7 @@ class Compiler(CompilerSuiteTool):
                  availability_option: Optional[Union[str, List[str]]] = None):
         super().__init__(name, exec_name, suite, category=category,
                          availability_option=availability_option)
-        self._version: Union[Tuple[int], None] = None
+        self._version: Union[Tuple[int, ...], None] = None
         self._mpi = mpi
         self._compile_flag = compile_flag if compile_flag else "-c"
         self._output_flag = output_flag if output_flag else "-o"
@@ -159,7 +159,7 @@ class Compiler(CompilerSuiteTool):
             self.logger.error(f'Error getting compiler version: {err}')
             return False
 
-    def get_version(self) -> Tuple[int]:
+    def get_version(self) -> Tuple[int, ...]:
         """
         Try to get the version of the given compiler.
 
