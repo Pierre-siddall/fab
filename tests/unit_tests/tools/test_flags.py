@@ -84,6 +84,12 @@ def test_profile_flags_with_profile():
     pf.add_flags(["-base2", "-base3"], "base")
     assert pf["base"] == ["-base", "-base2", "-base3"]
 
+    # Check that we get an exception if we specify a profile
+    # that does not exist
+    with pytest.raises(KeyError) as err:
+        _ = pf["does_not_exist"]
+    assert "Profile 'does_not_exist' is not defined" in str(err.value)
+
 
 def test_profile_flags_without_profile():
     '''Tests adding flags.'''
@@ -93,6 +99,11 @@ def test_profile_flags_without_profile():
     assert pf[""] == ["-base"]
     pf.add_flags(["-base2", "-base3"])
     assert pf[""] == ["-base", "-base2", "-base3"]
+
+    # Check that we get an exception if we specify a profile
+    with pytest.raises(KeyError) as err:
+        _ = pf["does_not_exist"]
+    assert "Profile 'does_not_exist' is not defined" in str(err.value)
 
 
 def test_profile_flags_inheriting():

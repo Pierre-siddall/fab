@@ -45,6 +45,8 @@ def test_run(tool_box):
                                         openmp_flag=None)
         mock_compiler.run = mock.Mock()
         linker = Linker(mock_compiler)
+        mock_compiler.define_profile("default")
+        linker.define_profile("default")
         # Mark the linker as available so it can added to the tool box:
         linker._is_available = True
         tool_box.add_tool(linker, silent_replace=True)

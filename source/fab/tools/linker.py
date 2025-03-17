@@ -17,6 +17,7 @@ import warnings
 from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler
+from fab.tools.flags import ProfileFlags
 from fab.tools.tool import CompilerSuiteTool
 
 
@@ -58,8 +59,8 @@ class Linker(CompilerSuiteTool):
         # Maintain a set of flags for common libraries.
         self._lib_flags: Dict[str, List[str]] = {}
         # Allow flags to include before or after any library-specific flags.
-        self._pre_lib_flags: List[str] = []
-        self._post_lib_flags: List[str] = []
+        self._pre_lib_flags = ProfileFlags()
+        self._post_lib_flags = ProfileFlags()
 
     def check_available(self) -> bool:
         ''':returns: whether this linker is available by asking the wrapped
@@ -90,6 +91,20 @@ class Linker(CompilerSuiteTool):
         ''':returns: the flag that is used to specify the output name.
         '''
         return self._compiler.output_flag
+
+    def define_profile(self,
+                       name: str,
+                       inherit_from: Optional[str] = None):
+        '''Defines a new profile name, and allows to specify if this new
+        profile inherit settings from an existing profile.
+
+        :param name: Name of the profile to define.
+        :param inherit_from: Optional name of a profile to inherit
+            settings from.
+        '''
+        self._flags.define_profile(name, inherit_from)
+        self._pre_lib_flags.define_profile(name, inherit_from)
+        self._post_lib_flags.define_profile(name, inherit_from)
 
     def get_profile_flags(self, profile: str) -> List[str]:
         ''':returns; the ProfileFlags for the given profile, combined
@@ -136,21 +151,23 @@ class Linker(CompilerSuiteTool):
         # Make a copy to avoid modifying the caller's list
         self._lib_flags[lib] = flags[:]
 
-    def add_pre_lib_flags(self, flags: List[str]):
+    def add_pre_lib_flags(self, flags: List[str],
+                          profile: Optional[str] = None):
         '''Add a set of flags to use before any library-specific flags
 
         :param flags: the flags to include
         '''
-        self._pre_lib_flags.extend(flags)
+        self._pre_lib_flags.add_flags(flags, profile)
 
-    def add_post_lib_flags(self, flags: List[str]):
+    def add_post_lib_flags(self, flags: List[str],
+                           profile: Optional[str] = None):
         '''Add a set of flags to use after any library-specific flags
 
         :param flags: the flags to include
         '''
-        self._post_lib_flags.extend(flags)
+        self._post_lib_flags.add_flags(flags, profile)
 
-    def get_pre_link_flags(self) -> List[str]:
+    def get_pre_link_flags(self, config: BuildConfig) -> List[str]:
         '''Returns the list of pre-link flags. It will concatenate the
         flags for this instance with all potentially wrapped linkers.
         This wrapper's flag will come first - the assumption is that
@@ -163,16 +180,16 @@ class Linker(CompilerSuiteTool):
         '''
         params: List[str] = []
         if self._pre_lib_flags:
-            params.extend(self._pre_lib_flags)
+            params.extend(self._pre_lib_flags[config.profile])
         if self._linker:
             # If we are wrapping a linker, get the wrapped linker's
             # pre-link flags and append them to the end (so the linker
             # wrapper's settings come before the setting from the
             # wrapped linker).
-            params.extend(self._linker.get_pre_link_flags())
+            params.extend(self._linker.get_pre_link_flags(config))
         return params
 
-    def get_post_link_flags(self) -> List[str]:
+    def get_post_link_flags(self, config: BuildConfig) -> List[str]:
         '''Returns the list of post-link flags. It will concatenate the
         flags for this instance with all potentially wrapped linkers.
         This wrapper's flag will be added to the end.
@@ -186,9 +203,9 @@ class Linker(CompilerSuiteTool):
             # post-link flags and add them first (so this linker
             # wrapper's settings come after the setting from the
             # wrapped linker).
-            params.extend(self._linker.get_post_link_flags())
+            params.extend(self._linker.get_post_link_flags(config))
         if self._post_lib_flags:
-            params.extend(self._post_lib_flags)
+            params.extend(self._post_lib_flags[config.profile])
         return params
 
     def link(self, input_files: List[Path], output_file: Path,
@@ -215,12 +232,12 @@ class Linker(CompilerSuiteTool):
 
         # TODO: why are the .o files sorted? That shouldn't matter
         params.extend(sorted(map(str, input_files)))
-        params.extend(self.get_pre_link_flags())
+        params.extend(self.get_pre_link_flags(config))
 
         for lib in (libs or []):
             params.extend(self.get_lib_flags(lib))
 
-        params.extend(self.get_post_link_flags())
+        params.extend(self.get_post_link_flags(config))
         params.extend([self.output_flag, str(output_file)])
 
         return self.run(params)

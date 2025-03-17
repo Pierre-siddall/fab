@@ -391,3 +391,29 @@ def test_linker_profile_flags_inheriting(mock_c_compiler):
     # One set f1-f4 from the compiler wrapper, one from the wrapped linker
     assert (linker_wrapper.get_profile_flags("derived") ==
             ["-f0", "-f1", "-f2", "-f3", "-f0", "-f1", "-f2", "-f3"])
+
+
+def test_linker_profile_modes(mock_linker):
+    '''Test that defining a profile mode in a linker will also define
+    the same modes in post- and pre-flags
+    '''
+
+    # Make sure that we get the expected errors at the start:
+    with pytest.raises(KeyError) as err:
+        mock_linker._pre_lib_flags["base"]
+    assert "Profile 'base' is not defined" in str(err.value)
+    with pytest.raises(KeyError) as err:
+        mock_linker._post_lib_flags["base"]
+    assert "Profile 'base' is not defined" in str(err.value)
+
+    mock_linker.define_profile("base")
+    assert mock_linker._pre_lib_flags["base"] == []
+    assert "base" not in mock_linker._pre_lib_flags._inherit_from
+    assert mock_linker._post_lib_flags["base"] == []
+    assert "base" not in mock_linker._post_lib_flags._inherit_from
+
+    mock_linker.define_profile("full-debug", "base")
+    assert mock_linker._pre_lib_flags["full-debug"] == []
+    assert mock_linker._pre_lib_flags._inherit_from["full-debug"] == "base"
+    assert mock_linker._post_lib_flags["full-debug"] == []
+    assert mock_linker._post_lib_flags._inherit_from["full-debug"] == "base"

@@ -53,9 +53,11 @@ class TestLinkExe:
             linker = Linker(compiler=mock_compiler)
             # Mark the linker as available so it can be added to the tool box
             linker._is_available = True
+            mock_compiler.define_profile("default")
+            linker.define_profile("default")
 
             # Add a custom library to the linker
-            linker.add_lib_flags('mylib', ['-L/my/lib', '-lmylib'])
+            linker.add_lib_flags('mylib', ['-L/my/lib', '-lmylib'], "default")
             tool_box.add_tool(linker, silent_replace=True)
             mock_result = mock.Mock(returncode=0, stdout="abc\ndef".encode())
             with mock.patch('fab.tools.tool.subprocess.run',

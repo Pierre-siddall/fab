@@ -113,9 +113,11 @@ class ProfileFlags:
         '''Returns the flags for the requested profile. If profile is not
         specified, the empty profile ("") will be used. It will also take
         inheritance into account, so add flags (recursively) from inherited
-        profiles. The function will not raise an exception if the profile
-        is not defined, since it is entirely possible that flags are only
-        provided via inheritance, or that no flags at all might be required.
+        profiles.
+
+        :param profile: the optional profile to use.
+
+        :raises KeyError: if a profile is specified it is not defined
         '''
         if not profile:
             profile = ""
@@ -129,10 +131,14 @@ class ProfileFlags:
             flags = self[inherit_from][:]
         else:
             flags = []
-        # Now add the flags from this ProfileFlags. It is possible that this
-        # compiler does not have a profile defined, only the base one might.
-        if profile in self._profiles:
+        # Now add the flags from this ProfileFlags. Note if no profile
+        # is specified, "" will be used as key, and this is always
+        # defined in the constructor of this object, so it will never
+        # raise an exception in this case
+        try:
             flags.extend(self._profiles[profile])
+        except KeyError as err:
+            raise KeyError(f"Profile '{profile}' is not defined.") from err
 
         return flags
 
