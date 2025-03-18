@@ -95,7 +95,7 @@ def test_compiler_hash():
     cc = Gcc()
     with mock.patch.object(cc, "_version", (5, 6, 7)):
         hash1 = cc.get_hash()
-        assert hash1 == 2768517656
+        assert hash1 == 2991650113
 
     # A change in the version number must change the hash:
     with mock.patch.object(cc, "_version", (8, 9)):

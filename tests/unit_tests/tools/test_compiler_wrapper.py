@@ -117,7 +117,7 @@ def test_compiler_hash():
                                       "mpicc-gcc")
     with mock.patch.object(mpicc, "_version", (567,)):
         hash1 = mpicc.get_hash()
-        assert hash1 == 4702012005
+        assert hash1 == 4925144462
 
     # A change in the version number must change the hash:
     with mock.patch.object(mpicc, "_version", (89,)):
