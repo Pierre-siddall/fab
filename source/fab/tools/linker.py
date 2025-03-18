@@ -63,14 +63,17 @@ class Linker(CompilerSuiteTool):
         self._post_lib_flags = ProfileFlags()
 
     def check_available(self) -> bool:
-        ''':returns: whether this linker is available by asking the wrapped
+        '''
+        :returns: whether this linker is available by asking the wrapped
             linker or compiler.
+
         '''
         return self._compiler.check_available()
 
     @property
     def suite(self) -> str:
-        ''':returns: the suite this linker belongs to by getting it from
+        '''
+        :returns: the suite this linker belongs to by getting it from
             the wrapped compiler.'''
         return self._compiler.suite
 
@@ -82,7 +85,8 @@ class Linker(CompilerSuiteTool):
 
     @property
     def openmp(self) -> bool:
-        ''':returns: whether this linker supports OpenMP or not by checking
+        '''
+        :returns: whether this linker supports OpenMP or not by checking
             with the wrapped compiler.'''
         return self._compiler.openmp
 

@@ -518,8 +518,10 @@ class Craycc(CCompiler):
 
     Cray has two different compilers. Older ones have as version number:
         Cray C : Version 8.7.0  Tue Jul 23, 2024  07:39:46
+
     Newer compiler (several lines, the important one):
         Cray clang version 15.0.1  (66f7391d6a03cf932f321b9f6b1d8612ef5f362c)
+
     We use the beginning ("cray c") to identify the compiler, which works for
     both cray c and cray clang. Then we ignore non-numbers, to reach the
     version number which is then extracted.
