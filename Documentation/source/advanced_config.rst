@@ -178,7 +178,7 @@ notification, as it needs to use this flag to control the output location.
 
 Compilation Profiles
 ====================
-Fab support compilation profiles. A compilation profile is essentially a simple
+Fab supports compilation profiles. A compilation profile is essentially a simple
 string that represents a set of compilation and linking flags to be used.
 For example, an application might have profiles for `full-debug`, `fast-debug`,
 and `production`. Compilation profiles can inherit settings, for example
@@ -229,7 +229,7 @@ this will be used by various Fab functions.
 
 By default, the dummy profile ``""`` is not used as a base class for
 any other profile. But it can be convenient to set this up to make
-user scripts slightly easier. Here an example of the usage
+user scripts slightly easier. Here is an example of the usage
 in LFRic, where at startup time a consistent set of profile modes are
 defined for any compiler and linker:
 
@@ -266,7 +266,7 @@ Later, the Intel Fortran compiler and linker ``ifort`` are setup as follows:
     linker.add_post_lib_flags(["-lstdc++"])
 
 The setup of the compiler does not use the dummy profile ``""`` at all,
-so it will stay empty. It is up the the user to decide how to use the
+so it will stay empty. It is up to the user to decide how to use the
 profiles, it would be entirely valid not to use the ``base`` profile, but
 instead to use ``""``. But when setting up the linker, no profile is specified.
 So line 10 and 11 will set these flags for ``""``. Because of ``base``

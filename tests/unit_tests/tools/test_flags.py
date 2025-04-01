@@ -108,7 +108,7 @@ def test_profile_flags_without_profile():
     # Check that we get an exception if we try to inherit from a profile
     # that does not exist
     with pytest.raises(KeyError) as err:
-        _ = pf.define_profile("new_profile", "does_not_exist")
+        pf.define_profile("new_profile", "does_not_exist")
     assert ("Inherited profile 'does_not_exist' is not defined."
             in str(err.value))
 
@@ -151,6 +151,11 @@ def test_profile_flags_removing():
         pf.remove_flag("-base1", "base")
     assert pf["base"] == ["-base2"]
 
+    # Try removing a flag that's not there. This should not
+    # cause any issues.
+    pf.remove_flag("-does-not-exist")
+    assert pf["base"] == ["-base2"]
+
     pf.add_flags(["-base1", "-base2"])
     warn_message = "Removing managed flag '-base1'."
     with pytest.warns(UserWarning, match=warn_message):
@@ -176,7 +181,7 @@ def test_profile_flags_errors_invalid_profile_name():
     KeyError in call functions.
     '''
     pf = ProfileFlags()
-    pf.define_profile("base",)
+    pf.define_profile("base")
     with pytest.raises(KeyError) as err:
         pf.define_profile("base")
     assert "Profile 'base' is already defined." in str(err.value)
