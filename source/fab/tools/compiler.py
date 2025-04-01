@@ -12,13 +12,14 @@ import os
 import re
 from pathlib import Path
 import warnings
-from typing import cast, List, Optional, Tuple, Union
+from typing import cast, List, Optional, Tuple, TYPE_CHECKING, Union
 import zlib
 
-from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.flags import Flags
 from fab.tools.tool import CompilerSuiteTool
+if TYPE_CHECKING:
+    from fab.build_config import BuildConfig
 
 
 class Compiler(CompilerSuiteTool):
@@ -107,7 +108,7 @@ class Compiler(CompilerSuiteTool):
 
     def compile_file(self, input_file: Path,
                      output_file: Path,
-                     config: BuildConfig,
+                     config: "BuildConfig",
                      add_flags: Union[None, List[str]] = None):
         '''Compiles a file. It will add the flag for compilation-only
         automatically, as well as the output directives. The current working
@@ -330,7 +331,7 @@ class FortranCompiler(Compiler):
 
     def compile_file(self, input_file: Path,
                      output_file: Path,
-                     config: BuildConfig,
+                     config: "BuildConfig",
                      add_flags: Union[None, List[str]] = None,
                      syntax_only: Optional[bool] = False):
         '''Compiles a file.

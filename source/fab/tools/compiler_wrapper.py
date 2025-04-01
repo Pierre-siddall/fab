@@ -9,11 +9,12 @@ the derived classes for mpif90, mpicc, and CrayFtnWrapper and CrayCcWrapper.
 """
 
 from pathlib import Path
-from typing import cast, List, Optional, Tuple, Union
+from typing import cast, List, Optional, Tuple, TYPE_CHECKING, Union
 
-from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler, FortranCompiler
+if TYPE_CHECKING:
+    from fab.build_config import BuildConfig
 
 
 class CompilerWrapper(Compiler):
@@ -132,7 +133,7 @@ class CompilerWrapper(Compiler):
 
     def compile_file(self, input_file: Path,
                      output_file: Path,
-                     config: BuildConfig,
+                     config: "BuildConfig",
                      add_flags: Union[None, List[str]] = None,
                      syntax_only: Optional[bool] = None):
         # pylint: disable=too-many-arguments

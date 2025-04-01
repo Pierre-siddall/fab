@@ -11,14 +11,15 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, TYPE_CHECKING, Union
 import warnings
 
-from fab.build_config import BuildConfig
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler
 from fab.tools.flags import ProfileFlags
 from fab.tools.tool import CompilerSuiteTool
+if TYPE_CHECKING:
+    from fab.build_config import BuildConfig
 
 
 class Linker(CompilerSuiteTool):
@@ -171,7 +172,7 @@ class Linker(CompilerSuiteTool):
         '''
         self._post_lib_flags.add_flags(flags, profile)
 
-    def get_pre_link_flags(self, config: BuildConfig) -> List[str]:
+    def get_pre_link_flags(self, config: "BuildConfig") -> List[str]:
         '''Returns the list of pre-link flags. It will concatenate the
         flags for this instance with all potentially wrapped linkers.
         This wrapper's flag will come first - the assumption is that
@@ -193,7 +194,7 @@ class Linker(CompilerSuiteTool):
             params.extend(self._linker.get_pre_link_flags(config))
         return params
 
-    def get_post_link_flags(self, config: BuildConfig) -> List[str]:
+    def get_post_link_flags(self, config: "BuildConfig") -> List[str]:
         '''Returns the list of post-link flags. It will concatenate the
         flags for this instance with all potentially wrapped linkers.
         This wrapper's flag will be added to the end.
@@ -213,7 +214,7 @@ class Linker(CompilerSuiteTool):
         return params
 
     def link(self, input_files: List[Path], output_file: Path,
-             config: BuildConfig,
+             config: "BuildConfig",
              libs: Optional[List[str]] = None) -> str:
         '''Executes the linker with the specified input files,
         creating `output_file`.
