@@ -180,3 +180,24 @@ def test_tool_repository_no_tool_available():
             tr.get_default(Category.SHELL)
         assert ("Can't find available 'SHELL' tool. Tools are 'sh'"
                 in str(err.value))
+
+
+def test_tool_repository_full_path():
+    '''Tests that a user can request a tool with a full path,
+    in which case the right tool should be returned with an updated
+    exec name that uses the path.
+    '''
+    tr = ToolRepository()
+    gfortran = tr.get_tool(Category.FORTRAN_COMPILER, "/usr/bin/gfortran")
+    assert isinstance(gfortran, Gfortran)
+    assert gfortran.name == "gfortran"
+    assert gfortran.exec_name == "/usr/bin/gfortran"
+
+    # Also make sure this name is indeed used when calling the compiler:
+    mock_result = mock.Mock(returncode=0)
+    with mock.patch('fab.tools.tool.subprocess.run',
+                    return_value=mock_result) as tool_run:
+        gfortran.run("a")
+    tool_run.assert_called_once_with(
+        ["/usr/bin/gfortran", "a"], capture_output=True, env=None,
+        cwd=None, check=False)

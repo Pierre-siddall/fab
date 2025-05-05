@@ -22,6 +22,8 @@ def test_tool_constructor():
     tool = Tool("gnu", "gfortran", Category.FORTRAN_COMPILER)
     assert str(tool) == "Tool - gnu: gfortran"
     assert tool.exec_name == "gfortran"
+    assert tool._exec_name == "gfortran"
+    assert tool._full_path == ""
     assert tool.name == "gnu"
     assert tool.category == Category.FORTRAN_COMPILER
     assert isinstance(tool.logger, logging.Logger)
@@ -48,6 +50,18 @@ def test_tool_constructor():
     assert misc.exec_name == "misc"
     assert misc.name == "misc"
     assert misc.category == Category.MISC
+
+
+def test_tool_set_path():
+    '''Test that we can add an absolute path for a tool,
+    e.g. in cases that a known compiler is not in the user's path.
+    '''
+    gfortran = Tool("gfortran", "gfortran", Category.FORTRAN_COMPILER)
+    gfortran.set_full_path("/usr/bin/gfortran1.2.3")
+    # Exec name should now return the full path
+    assert gfortran.exec_name == "/usr/bin/gfortran1.2.3"
+    # Path the name of the compiler is unchanged
+    assert gfortran.name == "gfortran"
 
 
 def test_tool_chance_exec_name():

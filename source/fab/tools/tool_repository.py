@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import cast, Optional
 
 from fab.tools.tool import Tool
@@ -140,11 +141,19 @@ class ToolRepository(dict):
                 self[linker.category].append(linker)
 
     def get_tool(self, category: Category, name: str) -> Tool:
-        ''':returns: the tool with a given name in the specified category.
+        '''This functions returns a tool with a given name. The name can be
+        specified using an absolute path, in which case only the stem will
+        be used to look up the name, but the returned tool will add the
+        full path to the tool. This allows the usage of e.g. compiler that
+        are not in $PATH of the user.
+
+        :returns: the tool with a given name in the specified category.
 
         :param category: the name of the category in which to look
             for the tool.
-        :param name: the name of the tool to find.
+        :param name: the name of the tool to find. A full path can be used,
+            in which case only the stem of the path is used, and the tool
+            will be updated to use the absolute path specified.
 
         :raises KeyError: if there is no tool in this category.
         :raises KeyError: if no tool in the given category has the
@@ -154,10 +163,20 @@ class ToolRepository(dict):
         if category not in self:
             raise KeyError(f"Unknown category '{category}' "
                            f"in ToolRepository.get_tool().")
+
+        path_name = Path(name)
+        full_path = None
+        if path_name.is_absolute():
+            # We have a full path:
+            name = path_name.name
+            full_path = str(path_name)
         all_tools = self[category]
         for tool in all_tools:
             if tool.name == name:
+                if full_path:
+                    tool.set_full_path(full_path)
                 return tool
+
         raise KeyError(f"Unknown tool '{name}' in category '{category}' "
                        f"in ToolRepository.")
 

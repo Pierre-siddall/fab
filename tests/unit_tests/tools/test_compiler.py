@@ -44,6 +44,18 @@ def test_compiler():
     assert fc.openmp_flag == "-fopenmp"
 
 
+def test_compiler_exec_paths():
+    '''Tests compiler with absolute paths.
+    '''
+    cc = Compiler("gcc", "gcc", "gnu", version_regex="some_regex",
+                  category=Category.C_COMPILER, openmp_flag="-fopenmp")
+    assert cc._exec_name == "gcc"
+    assert cc.exec_name == "gcc"
+    cc.set_full_path("/usr/bin/gcc")
+    assert cc._exec_name == "gcc"
+    assert cc.exec_name == "/usr/bin/gcc"
+
+
 def test_compiler_openmp():
     '''Test that the openmp flag is correctly reflected in the test if
     a compiler supports OpenMP or not.'''
