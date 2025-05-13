@@ -11,7 +11,7 @@ from unittest import mock
 import pytest
 
 from fab.tools import (Ar, Category, FortranCompiler, Gcc, Gfortran, Ifort,
-                       ToolRepository)
+                       Mpif90, ToolRepository)
 
 
 def test_tool_repository_get_singleton_new():
@@ -42,8 +42,53 @@ def test_tool_repository_get_tool():
     assert isinstance(ifort, Ifort)
 
 
+def test_tool_repository_get_tool_with_exec_name(mock_fortran_compiler):
+    '''Tests get_tool when the name of the executable is specified, e.g.
+    mpif90 (instead of the Fab name mpif90-gfortran etc).
+
+    '''
+    tr = ToolRepository()
+    # Keep a copy of gfortran for later
+    gfortran = tr.get_tool(Category.FORTRAN_COMPILER, "gfortran")
+
+    # First add just one unavailable Fortran compiler and an mpif90 wrapper:
+    tr[Category.FORTRAN_COMPILER] = []
+    tr.add_tool(mock_fortran_compiler)
+    mpif90 = Mpif90(mock_fortran_compiler)
+    tr.add_tool(mpif90)
+
+    # If mpif90 is not available, an error is raised:
+    mpif90._is_available = False
+    try:
+        tr.get_tool(Category.FORTRAN_COMPILER, "mpif90")
+    except KeyError as err:
+        assert "Unknown tool 'mpif90' in category" in str(err)
+
+    # When using the exec name, the compiler must be available:
+    mpif90._is_available = True
+    f90 = tr.get_tool(Category.FORTRAN_COMPILER, "mpif90")
+    assert f90 is mpif90
+
+    # Now add mpif90-gfortran, set mpif90-gfortran as available,
+    # and mpif90-mock-fortran as unavailable. We need to make sure
+    # we then get mpif90-gfortran:
+    mpif90_gfortran = Mpif90(gfortran)
+    tr.add_tool(mpif90_gfortran)
+    mpif90._is_available = False
+    mpif90_gfortran._is_available = True
+    f90 = tr.get_tool(Category.FORTRAN_COMPILER, "mpif90")
+    assert f90 is mpif90_gfortran
+
+    # Then verify using the full path
+    f90 = tr.get_tool(Category.FORTRAN_COMPILER, "/some/where/mpif90")
+    assert f90 is mpif90_gfortran
+    assert f90._full_path == "/some/where/mpif90"
+    # Reset the repository, since this test messed up the compilers.
+    ToolRepository._singleton = None
+
+
 def test_tool_repository_get_tool_error():
-    '''Tests error handling during tet_tool.'''
+    '''Tests error handling during get_tool.'''
     tr = ToolRepository()
     with pytest.raises(KeyError) as err:
         tr.get_tool("unknown-category", "something")

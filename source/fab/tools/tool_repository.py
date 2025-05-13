@@ -141,11 +141,23 @@ class ToolRepository(dict):
                 self[linker.category].append(linker)
 
     def get_tool(self, category: Category, name: str) -> Tool:
-        '''This functions returns a tool with a given name. The name can be
-        specified using an absolute path, in which case only the stem will
-        be used to look up the name, but the returned tool will add the
-        full path to the tool. This allows the usage of e.g. compiler that
-        are not in $PATH of the user.
+        '''This functions returns a tool with a given name. The name can
+        either be a Fab compiler name (including wrapper naming), e.g.
+        mpif90-gfortran, or linker-mpif90-ifort, or just the name of the
+        executable (mpif90). If a Fab name is specified, the corresponding
+        tool will be returned, even if it should not be available (allowing
+        default site scripts to setup any compiler, even if they are not
+        available everywhere). If an exec name is specified, the tool
+        must be available. This is required to make sure the user gets the
+        right tool: by specifying just mpif90, it is not clear if the user
+        wants mpif90-ifort, mpif90-gfortran, ... . But only one of these
+        tools will actually be available (the wrapper checks the version
+        number to detect the compiler-vendor).
+
+        The name can also be specified using an absolute path, in which case
+        only the stem will be used to look up the name, but the returned tool
+        will be updated to use the full path to the tool. This allows the
+        usage of e.g. compilers that are not in $PATH of the user.
 
         :returns: the tool with a given name in the specified category.
 
@@ -171,8 +183,22 @@ class ToolRepository(dict):
             name = path_name.name
             full_path = str(path_name)
         all_tools = self[category]
+        # First check if the name is a Fab compiler name, e.g.
+        # `mpif90-gfortran`:
         for tool in all_tools:
             if tool.name == name:
+                if full_path:
+                    tool.set_full_path(full_path)
+                return tool
+        # Otherwise, check if we have an executable with the given
+        # name. This will allow to specify `mpif90` as linker or compiler
+        # without additional details (`-gfortran` etc). But in this case
+        # we can only return tools that are available (otherwise the
+        # tool returned might be mpif90-ifort when the user has actually
+        # mpif90-gfortran available)
+        for tool in all_tools:
+            print("XX", tool, tool.exec_name, name, tool.is_available)
+            if tool.exec_name == name and tool.is_available:
                 if full_path:
                     tool.set_full_path(full_path)
                 return tool
