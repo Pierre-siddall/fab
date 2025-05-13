@@ -67,15 +67,18 @@ def test_compiler_wrapper_version_consistency():
 
 
 def test_compiler_wrapper_version_compiler_unavailable():
-    '''Checks the behaviour if the wrapped compiler is not available.
-    The wrapper should then report an empty result.
+    '''Checks the behaviour if the wrapped compiler is not available (i.e.
+    `get_version` raises a RuntimeErro), but the wrapper itself returns a
+    valid version number (which can happen if the compiler are not in PATH
+    but called using absolute paths).
     '''
-
     mpicc = Mpicc(Gcc())
-    with mock.patch.object(mpicc.compiler, '_is_available', False):
-        with pytest.raises(RuntimeError) as err:
-            assert mpicc.get_version() == ""
-        assert "Cannot get version of wrapped compiler" in str(err.value)
+    with mock.patch('fab.tools.compiler.Compiler.run_version_command',
+                    return_value="gcc (GCC) 8.6.0 20210514 (Red Hat "
+                                 "8.5.0-20)"):
+        with mock.patch.object(mpicc.compiler, "get_version",
+                               side_effect=RuntimeError("")):
+            assert mpicc.get_version() == (8, 6, 0)
 
 
 def test_compiler_is_available_ok():

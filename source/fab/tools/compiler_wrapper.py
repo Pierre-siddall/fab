@@ -64,15 +64,20 @@ class CompilerWrapper(Compiler):
 
         try:
             compiler_version = self._compiler.get_version()
-        except RuntimeError as err:
-            raise RuntimeError(f"Cannot get version of wrapped compiler '"
-                               f"{self._compiler}") from err
+        except RuntimeError:
+            # This can e.g. happen if the wrapped compiler is not in PATH
+            # but the wrapper uses the full path (which Fab doesn't know).
+            # Still continue in this case, since this wrapper is using the
+            # wrapped compiler's version detection regex, so we can assume
+            # that the compiler wrapper works, we just can't verify that
+            # it is the same version.
+            compiler_version = None
 
         wrapper_version = super().get_version()
-        if compiler_version != wrapper_version:
+        if compiler_version and compiler_version != wrapper_version:
             compiler_version_string = self._compiler.get_version_string()
             # We cannot call super().get_version_string(), since this calls
-            # calls get_version(), so we get an infinite recursion
+            # calls get_version(), so we would get an infinite recursion
             wrapper_version_string = ".".join(str(x) for x in wrapper_version)
             raise RuntimeError(f"Different version for compiler "
                                f"'{self._compiler}' "
