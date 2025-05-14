@@ -197,7 +197,6 @@ class ToolRepository(dict):
         # tool returned might be mpif90-ifort when the user has actually
         # mpif90-gfortran available)
         for tool in all_tools:
-            print("XX", tool, tool.exec_name, name, tool.is_available)
             if tool.exec_name == name and tool.is_available:
                 if full_path:
                     tool.set_full_path(full_path)
