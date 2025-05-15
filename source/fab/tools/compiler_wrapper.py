@@ -116,7 +116,7 @@ class CompilerWrapper(Compiler):
                            f"no has_syntax_only.")
 
     def get_flags(self, profile: Optional[str] = None) -> List[str]:
-        ''':returns; the ProfileFlags for the given profile, combined
+        ''':returns: the ProfileFlags for the given profile, combined
         from the wrapped compiler and this wrapper.
         :param profile: the profile to use.'''
         return (self._compiler.get_flags(profile) +
