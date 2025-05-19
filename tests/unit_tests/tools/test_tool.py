@@ -64,15 +64,6 @@ def test_tool_set_path():
     assert gfortran.name == "gfortran"
 
 
-def test_tool_chance_exec_name():
-    '''Test that we can change the name of the executable.
-    '''
-    tool = Tool("gfortran", "gfortran", Category.FORTRAN_COMPILER)
-    assert tool.exec_name == "gfortran"
-    tool.change_exec_name("start_me_instead")
-    assert tool.exec_name == "start_me_instead"
-
-
 def test_tool_is_available():
     '''Test that is_available works as expected.'''
     tool = Tool("gfortran", "gfortran", Category.FORTRAN_COMPILER)

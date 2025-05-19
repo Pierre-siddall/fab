@@ -13,6 +13,7 @@ from typing import cast, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler, FortranCompiler
+from fab.tools.flags import Flags
 if TYPE_CHECKING:
     from fab.build_config import BuildConfig
 
@@ -136,15 +137,63 @@ class CompilerWrapper(Compiler):
                                f"'set_module_output_path' function.")
         cast(FortranCompiler, self._compiler).set_module_output_path(path)
 
+    def get_all_commandline_options(
+            self,
+            config: "BuildConfig",
+            input_file: Path,
+            output_file: Path,
+            add_flags:  Union[None, List[str]] = None,
+            syntax_only: Optional[bool] = False) -> List[str]:
+        '''This function returns all command line options for a
+        compiler wrapper. The syntax_only flag is only accepted,
+        if the wrapped compiler is a Fortran compiler. Otherwise,
+        an exception will be raised.
+
+        :param input_file: the name of the input file.
+        :param output_file: the name of the output file.
+        :param config: The BuildConfig, from which compiler profile and OpenMP
+            status are taken.
+        :param add_flags: additional flags for the compiler.
+        :param syntax_only: if set, the compiler will only do
+            a syntax check
+
+        :returns: command line flags for compiler wrapper.
+
+        :raises RuntimeError: if syntax_only is requested for a non-Fortran
+            compiler.
+        '''
+
+        # We need to distinguish between Fortran and non-Fortran compiler,
+        # since inly a Fortran compiler supports the syntax-only flag.
+        new_flags = Flags(add_flags)
+        if self._compiler.category is Category.FORTRAN_COMPILER:
+            # Make mypy happy
+            self._compiler = cast(FortranCompiler, self._compiler)
+            if self._compiler._module_folder_flag:
+                # Remove a user's module flag, which would interfere
+                # with Fab's module handling.
+                new_flags.remove_flag(self._compiler._module_folder_flag,
+                                      has_parameter=True)
+            flags = self._compiler.get_all_commandline_options(
+                    config, input_file, output_file, add_flags=add_flags,
+                    syntax_only=syntax_only)
+        else:
+            # It's not valid to specify syntax_only for a non-Fortran compiler
+            if syntax_only is not None:
+                raise RuntimeError(f"Syntax-only cannot be used with compiler "
+                                   f"'{self.name}'.")
+            flags = self._compiler.get_all_commandline_options(
+                    config, input_file, output_file, add_flags=add_flags)
+
+        return flags
+
     def compile_file(self, input_file: Path,
                      output_file: Path,
                      config: "BuildConfig",
                      add_flags: Union[None, List[str]] = None,
                      syntax_only: Optional[bool] = None):
         # pylint: disable=too-many-arguments
-        '''Compiles a file using the wrapper compiler. It will temporarily
-        change the executable name of the wrapped compiler, and then calls
-        the original compiler (to get all its parameters)
+        '''Compiles a file using the wrapper compiler.
 
         :param input_file: the name of the input file.
         :param output_file: the name of the output file.
@@ -155,32 +204,12 @@ class CompilerWrapper(Compiler):
             a syntax check
         '''
 
-        # TODO #370: replace change_exec_name, and instead provide
-        # a function that returns the whole command line, which can
-        # then be modified here.
-        orig_compiler_name = self._compiler.exec_name
-        self._compiler.change_exec_name(self.exec_name)
-        if add_flags is None:
-            add_flags = []
-        if self._compiler.category is Category.FORTRAN_COMPILER:
-            # Mypy complains that self._compiler does not take the syntax
-            # only parameter. Since we know it's a FortranCompiler.
-            # do a cast to tell mypy that this is now a Fortran compiler
-            # (or a CompilerWrapper in case of nested CompilerWrappers,
-            # which also supports the syntax_only flag anyway)
-            self._compiler = cast(FortranCompiler, self._compiler)
-            self._compiler.compile_file(input_file, output_file, config=config,
-                                        add_flags=self.get_flags() + add_flags,
-                                        syntax_only=syntax_only,
-                                        )
-        else:
-            if syntax_only is not None:
-                raise RuntimeError(f"Syntax-only cannot be used with compiler "
-                                   f"'{self.name}'.")
-            self._compiler.compile_file(input_file, output_file, config=config,
-                                        add_flags=self.get_flags()+add_flags
-                                        )
-        self._compiler.change_exec_name(orig_compiler_name)
+        flags = self.get_all_commandline_options(
+            config, input_file, output_file, add_flags=add_flags,
+            syntax_only=syntax_only)
+
+        self.run(profile=config.profile, cwd=input_file.parent,
+                 additional_parameters=flags)
 
 
 # ============================================================================

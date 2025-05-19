@@ -8,7 +8,7 @@
 '''
 
 import os
-from pathlib import Path, PosixPath
+from pathlib import Path
 from textwrap import dedent
 from unittest import mock
 
@@ -186,11 +186,12 @@ def test_compiler_without_openmp(mock_config):
     fc.run = mock.Mock()
     mock_config._openmp = False
     fc.compile_file(Path("a.f90"), "a.o", config=mock_config, syntax_only=True)
-    fc.run.assert_called_with(cwd=Path('.'),
+    fc.run.assert_called_with(cwd=Path("."),
                               profile='',
-                              additional_parameters=['-c', '-fsyntax-only',
-                                                     "-J", '/tmp', 'a.f90',
-                                                     '-o', 'a.o', ])
+                              additional_parameters=['-c', 'a.f90',
+                                                     '-o', 'a.o',
+                                                     '-fsyntax-only',
+                                                     '-J', '/tmp'])
 
 
 def test_compiler_with_openmp(mock_config):
@@ -207,11 +208,11 @@ def test_compiler_with_openmp(mock_config):
     mock_config._profile = "test_profile"
     fc.compile_file(Path("a.f90"), "a.o", config=mock_config,
                     syntax_only=False)
-    fc.run.assert_called_with(cwd=Path('.'),
+    fc.run.assert_called_with(cwd=Path("."),
                               profile='test_profile',
                               additional_parameters=['-c', '-fopenmp',
-                                                     "-J", '/tmp', 'a.f90',
-                                                     '-o', 'a.o', ])
+                                                     'a.f90', '-o', 'a.o',
+                                                     '-J', '/tmp'])
 
 
 def test_compiler_module_output(mock_config):
@@ -223,10 +224,10 @@ def test_compiler_module_output(mock_config):
     fc.run = mock.MagicMock()
     mock_config._openmp = False
     fc.compile_file(Path("a.f90"), "a.o", config=mock_config, syntax_only=True)
-    fc.run.assert_called_with(cwd=PosixPath('.'),
+    fc.run.assert_called_with(cwd=Path("."),
                               profile='',
-                              additional_parameters=['-c', '-J', '/module_out',
-                                                     'a.f90', '-o', 'a.o'])
+                              additional_parameters=['-c', 'a.f90', '-o',
+                                                     'a.o', '-J', '/module_out'])
 
 
 def test_compiler_with_add_args(mock_config):
@@ -244,11 +245,11 @@ def test_compiler_with_add_args(mock_config):
         fc.compile_file(Path("a.f90"), "a.o", add_flags=["-J/b", "-O3"],
                         config=mock_config, syntax_only=True)
     # Notice that "-J/b" has been removed
-    fc.run.assert_called_with(cwd=PosixPath('.'),
+    fc.run.assert_called_with(cwd=Path("."),
                               profile='default',
-                              additional_parameters=['-c', '-O3',
+                              additional_parameters=['-c', '-O3', 'a.f90', '-o', 'a.o',
                                                      '-J', '/module_out',
-                                                     'a.f90', '-o', 'a.o'])
+                                                     ])
     mock_config._openmp = True
     with pytest.warns(UserWarning,
                       match="explicitly provided. OpenMP should be enabled in "

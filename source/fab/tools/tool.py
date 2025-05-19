@@ -104,16 +104,6 @@ class Tool:
             return self._full_path
         return self._exec_name
 
-    def change_exec_name(self, exec_name: str):
-        '''Changes the name of the executable This function should in general
-        not be used (typically it is better to create a new tool instead). The
-        function is only provided to support CompilerWrapper (like mpif90),
-        which need all parameters from the original compiler, but call the
-        wrapper. The name of the compiler will be changed just before
-        compilation, and then set back to its original value
-        '''
-        self._exec_name = exec_name
-
     @property
     def name(self) -> str:
         ''':returns: the name of the tool.'''
