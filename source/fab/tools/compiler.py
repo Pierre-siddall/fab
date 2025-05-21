@@ -58,6 +58,7 @@ class Compiler(CompilerSuiteTool):
                  compile_flag: Optional[str] = None,
                  output_flag: Optional[str] = None,
                  openmp_flag: Optional[str] = None,
+                 version_argument: Optional[str] = None,
                  availability_option: Optional[Union[str, List[str]]] = None):
         super().__init__(name, exec_name, suite, category=category,
                          availability_option=availability_option)
@@ -66,24 +67,30 @@ class Compiler(CompilerSuiteTool):
         self._compile_flag = compile_flag if compile_flag else "-c"
         self._output_flag = output_flag if output_flag else "-o"
         self._openmp_flag = openmp_flag if openmp_flag else ""
+        self.__version_argument = version_argument or '--version'
         self._version_regex = version_regex
 
     @property
     def mpi(self) -> bool:
-        ''':returns: whether this compiler supports MPI or not.'''
+        """
+        :returns: whether this compiler supports MPI or not.
+        """
         return self._mpi
 
     @property
     def openmp(self) -> bool:
-        ''':returns: if the compiler supports openmp or not
-        '''
+        """
+        :returns: compiler's OpenMP support.
+        """
         # It is important not to use `_openmp_flag` directly, since a compiler
         # wrapper overwrites `openmp_flag`.
         return self.openmp_flag != ""
 
     @property
     def openmp_flag(self) -> str:
-        ''':returns: the flag to enable OpenMP.'''
+        """
+        :returns: compiler argument to enable OpenMP.
+        """
         return self._openmp_flag
 
     @property
@@ -93,7 +100,9 @@ class Compiler(CompilerSuiteTool):
 
     @property
     def output_flag(self) -> str:
-        '''Returns the flag that specifies the output flag.'''
+        """
+        :returns: compiler argument for output file.
+        """
         return self._output_flag
 
     def get_hash(self, profile: Optional[str] = None) -> int:
@@ -207,7 +216,7 @@ class Compiler(CompilerSuiteTool):
 
         # Run the compiler to get the version and parse the output
         # The implementations depend on vendor
-        output = self.run_version_command()
+        output = self.run_version_command(self.__version_argument)
 
         # Multiline is required in case that the version number is the end
         # of the string, otherwise the $ would not match the end of line
@@ -293,12 +302,16 @@ class CCompiler(Compiler):
                  mpi: bool = False,
                  compile_flag: Optional[str] = None,
                  output_flag: Optional[str] = None,
-                 openmp_flag: Optional[str] = None):
+                 openmp_flag: Optional[str] = None,
+                 version_argument: Optional[str] = None,
+                 availability_option: Optional[str] = None):
         super().__init__(name, exec_name, suite,
                          category=Category.C_COMPILER, mpi=mpi,
                          compile_flag=compile_flag, output_flag=output_flag,
                          openmp_flag=openmp_flag,
-                         version_regex=version_regex)
+                         version_argument=version_argument,
+                         version_regex=version_regex,
+                         availability_option=availability_option)
 
 
 # ============================================================================
@@ -331,6 +344,7 @@ class FortranCompiler(Compiler):
                  compile_flag: Optional[str] = None,
                  output_flag: Optional[str] = None,
                  openmp_flag: Optional[str] = None,
+                 version_argument: Optional[str] = None,
                  module_folder_flag: Optional[str] = None,
                  syntax_only_flag: Optional[str] = None,
                  ):
@@ -339,6 +353,7 @@ class FortranCompiler(Compiler):
                          category=Category.FORTRAN_COMPILER,
                          mpi=mpi, compile_flag=compile_flag,
                          output_flag=output_flag, openmp_flag=openmp_flag,
+                         version_argument=version_argument,
                          version_regex=version_regex)
         self._module_folder_flag = (module_folder_flag if module_folder_flag
                                     else "")
@@ -484,6 +499,8 @@ class Icc(CCompiler):
     def __init__(self, name: str = "icc", exec_name: str = "icc"):
         super().__init__(name, exec_name, suite="intel-classic",
                          openmp_flag="-qopenmp",
+                         availability_option='-V',
+                         version_argument='-V',
                          version_regex=r"icc \(ICC\) (\d[\d\.]+\d) ")
 
 
@@ -501,6 +518,7 @@ class Ifort(FortranCompiler):
                          module_folder_flag="-module",
                          openmp_flag="-qopenmp",
                          syntax_only_flag="-syntax-only",
+                         version_argument='-V',
                          version_regex=r"ifort \(IFORT\) (\d[\d\.]+\d) ")
 
 
@@ -540,9 +558,8 @@ class Ifx(FortranCompiler):
 # nvidia
 # ============================================================================
 class Nvc(CCompiler):
-    '''Class for Nvidia's nvc compiler. Nvc has a '-' in the
-    version number. In order to get this, we overwrite run_version_command
-    and replace any '-' with a '.'
+    '''Class for Nvidia's nvc compiler. Note that the '-' in the Nvidia
+    version number is ignored, e.g. 23.5-0 would return '23.5'.
 
     :param name: name of this compiler.
     :param exec_name: name of the executable.
@@ -551,14 +568,14 @@ class Nvc(CCompiler):
     def __init__(self, name: str = "nvc", exec_name: str = "nvc"):
         super().__init__(name, exec_name, suite="nvidia",
                          openmp_flag="-mp",
+                         version_argument='-V',
                          version_regex=r"nvc (\d[\d\.]+\d)")
 
 
 # ============================================================================
 class Nvfortran(FortranCompiler):
-    '''Class for Nvidia's nvfortran compiler. Nvfortran has a '-' in the
-    version number. In order to get this, we overwrite run_version_command
-    and replace any '-' with a '.'
+    '''Class for Nvidia's nvfortran compiler. Note that the '-' in the Nvidia
+    version number is ignored, e.g. 23.5-0 would return '23.5'.
 
     :param name: name of this compiler.
     :param exec_name: name of the executable.
@@ -569,6 +586,7 @@ class Nvfortran(FortranCompiler):
                          module_folder_flag="-module",
                          openmp_flag="-mp",
                          syntax_only_flag="-Msyntax-only",
+                         version_argument='-V',
                          version_regex=r"nvfortran (\d[\d\.]+\d)")
 
 

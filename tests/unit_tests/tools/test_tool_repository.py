@@ -3,12 +3,11 @@
 # For further details please refer to the file COPYRIGHT
 # which you should have received as part of this distribution
 ##############################################################################
-
-'''This module tests the ToolRepository.
-'''
-
-from unittest import mock
-import pytest
+"""
+Tests ToolBox class.
+"""
+from pytest import mark, raises
+from pytest_subprocess.fake_process import FakeProcess
 
 from fab.tools import (Ar, Category, FortranCompiler, Gcc, Gfortran, Ifort,
                        Mpif90, ToolRepository)
@@ -42,7 +41,7 @@ def test_tool_repository_get_tool():
     assert isinstance(ifort, Ifort)
 
 
-def test_tool_repository_get_tool_with_exec_name(mock_fortran_compiler):
+def test_tool_repository_get_tool_with_exec_name(stub_fortran_compiler):
     '''Tests get_tool when the name of the executable is specified, e.g.
     mpif90 (instead of the Fab name mpif90-gfortran etc).
 
@@ -53,8 +52,8 @@ def test_tool_repository_get_tool_with_exec_name(mock_fortran_compiler):
 
     # First add just one unavailable Fortran compiler and an mpif90 wrapper:
     tr[Category.FORTRAN_COMPILER] = []
-    tr.add_tool(mock_fortran_compiler)
-    mpif90 = Mpif90(mock_fortran_compiler)
+    tr.add_tool(stub_fortran_compiler)
+    mpif90 = Mpif90(stub_fortran_compiler)
     tr.add_tool(mpif90)
 
     # If mpif90 is not available, an error is raised:
@@ -70,7 +69,7 @@ def test_tool_repository_get_tool_with_exec_name(mock_fortran_compiler):
     assert f90 is mpif90
 
     # Now add mpif90-gfortran, set mpif90-gfortran as available,
-    # and mpif90-mock-fortran as unavailable. We need to make sure
+    # and mpif90-stub-fortran as unavailable. We need to make sure
     # we then get mpif90-gfortran:
     mpif90_gfortran = Mpif90(gfortran)
     tr.add_tool(mpif90_gfortran)
@@ -87,20 +86,22 @@ def test_tool_repository_get_tool_with_exec_name(mock_fortran_compiler):
     ToolRepository._singleton = None
 
 
-def test_tool_repository_get_tool_error():
-    '''Tests error handling during get_tool.'''
+def test_get_tool_error():
+    """
+    Tests error handling during tet_tool.
+    """
     tr = ToolRepository()
-    with pytest.raises(KeyError) as err:
+    with raises(KeyError) as err:
         tr.get_tool("unknown-category", "something")
     assert "Unknown category 'unknown-category'" in str(err.value)
 
-    with pytest.raises(KeyError) as err:
+    with raises(KeyError) as err:
         tr.get_tool(Category.C_COMPILER, "something")
     assert ("Unknown tool 'something' in category 'C_COMPILER'"
             in str(err.value))
 
 
-def test_tool_repository_get_default():
+def test_get_default() -> None:
     '''Tests get_default.'''
     tr = ToolRepository()
     gfortran = tr.get_default(Category.FORTRAN_COMPILER, mpi=False,
@@ -115,119 +116,156 @@ def test_tool_repository_get_default():
     assert isinstance(ar, Ar)
 
 
-def test_tool_repository_get_default_error_invalid_category():
-    '''Tests error handling in get_default, the category
-    must be a Category, not e.g. a string.'''
+def test_get_default_error_invalid_category() -> None:
+    """
+    Tests error handling in get_default, the category must be a Category,
+    not e.g. a string.
+    """
     tr = ToolRepository()
-    with pytest.raises(RuntimeError) as err:
-        tr.get_default("unknown-category-type")
+    with raises(RuntimeError) as err:
+        tr.get_default("unknown-category-type")  # type: ignore[arg-type]
     assert "Invalid category type 'str'." in str(err.value)
 
 
-def test_tool_repository_get_default_error_missing_mpi():
-    '''Tests error handling in get_default when the optional MPI
-    parameter is missing (which is required for a compiler).'''
+def test_get_default_error_missing_mpi() -> None:
+    """
+    Tests error handling in get_default when the optional MPI
+    parameter is missing (which is required for a compiler).
+    """
     tr = ToolRepository()
-    with pytest.raises(RuntimeError) as err:
+    with raises(RuntimeError) as err:
         tr.get_default(Category.FORTRAN_COMPILER, openmp=True)
-    assert ("Invalid or missing mpi specification for 'FORTRAN_COMPILER'"
-            in str(err.value))
-    with pytest.raises(RuntimeError) as err:
-        tr.get_default(Category.FORTRAN_COMPILER, mpi="123")
-    assert ("Invalid or missing mpi specification for 'FORTRAN_COMPILER'"
-            in str(err.value))
+    assert str(err.value) == ("Invalid or missing mpi specification "
+                              "for 'FORTRAN_COMPILER'.")
+
+    with raises(RuntimeError) as err:
+        tr.get_default(Category.FORTRAN_COMPILER, mpi=True)
+    assert str(err.value) == ("Invalid or missing openmp specification "
+                              "for 'FORTRAN_COMPILER'.")
 
 
-def test_tool_repository_get_default_error_missing_openmp():
-    '''Tests error handling in get_default when the optional openmp
-    parameter is missing (which is required for a compiler).'''
+def test_get_default_error_missing_openmp() -> None:
+    """
+    Tests error handling in get_default when the optional openmp
+    parameter is missing (which is required for a compiler).
+    """
     tr = ToolRepository()
-    with pytest.raises(RuntimeError) as err:
+
+    with raises(RuntimeError) as err:
         tr.get_default(Category.FORTRAN_COMPILER, mpi=True)
     assert ("Invalid or missing openmp specification for 'FORTRAN_COMPILER'"
             in str(err.value))
-    with pytest.raises(RuntimeError) as err:
-        tr.get_default(Category.FORTRAN_COMPILER, mpi=True, openmp="123")
-    assert ("Invalid or missing openmp specification for 'FORTRAN_COMPILER'"
-            in str(err.value))
+    with raises(RuntimeError) as err:
+        tr.get_default(Category.FORTRAN_COMPILER, mpi=True,
+                       openmp='123')  # type: ignore[arg-type]
+    assert str(err.value) == ("Invalid or missing openmp specification "
+                              "for 'FORTRAN_COMPILER'.")
 
 
-@pytest.mark.parametrize("mpi, openmp, message",
-                         [(False, False, "any 'FORTRAN_COMPILER'."),
-                          (False, True,
-                           "'FORTRAN_COMPILER' that supports OpenMP"),
-                          (True, False,
-                           "'FORTRAN_COMPILER' that supports MPI"),
-                          (True, True, "'FORTRAN_COMPILER' that supports MPI "
-                                       "and OpenMP.")])
-def test_tool_repository_get_default_error_missing_compiler(mpi, openmp,
-                                                            message):
-    '''Tests error handling in get_default when there is no compiler
-    that fulfils the requirements with regards to OpenMP and MPI.'''
+@mark.parametrize("mpi, openmp, message",
+                  [(False, False, "any 'FORTRAN_COMPILER'."),
+                   (False, True,
+                    "'FORTRAN_COMPILER' that supports OpenMP."),
+                   (True, False,
+                    "'FORTRAN_COMPILER' that supports MPI."),
+                   (True, True, "'FORTRAN_COMPILER' that supports MPI "
+                    "and OpenMP.")])
+def test_get_default_error_missing_compiler(mpi, openmp, message,
+                                            monkeypatch) -> None:
+    """
+    Tests error handling in get_default when there is no compiler
+    that fulfils the requirements with regards to OpenMP and MPI.
+    """
     tr = ToolRepository()
-    with mock.patch.dict(tr, {Category.FORTRAN_COMPILER: []}), \
-            pytest.raises(RuntimeError) as err:
+    monkeypatch.setitem(tr, Category.FORTRAN_COMPILER, [])
+
+    with raises(RuntimeError) as err:
         tr.get_default(Category.FORTRAN_COMPILER, mpi=mpi, openmp=openmp)
+    assert str(err.value) == f"Could not find {message}"
 
-    assert f"Could not find {message}" in str(err.value)
 
-
-def test_tool_repository_get_default_error_missing_openmp_compiler():
-    '''Tests error handling in get_default when there is a compiler, but it
+def test_get_default_error_missing_openmp_compiler(monkeypatch) -> None:
+    """
+    Tests error handling in get_default when there is a compiler, but it
     does not support OpenMP (which triggers additional tests in the
-    ToolRepository.'''
-    tr = ToolRepository()
-    fc = FortranCompiler("gfortran", "gfortran", "gnu", openmp_flag=None,
-                         module_folder_flag="-J", version_regex=None)
+    ToolRepository.
 
-    with mock.patch.dict(tr, {Category.FORTRAN_COMPILER: [fc]}), \
-            pytest.raises(RuntimeError) as err:
+    Todo: Monkeying with internal state is bad.
+    """
+    fc = FortranCompiler("Simply Fortran", 'sfc', 'simply', openmp_flag=None,
+                         module_folder_flag="-mods", version_regex=r'([\d.]+]')
+
+    tr = ToolRepository()
+    monkeypatch.setitem(tr, Category.FORTRAN_COMPILER, [fc])
+
+    with raises(RuntimeError) as err:
         tr.get_default(Category.FORTRAN_COMPILER, mpi=False, openmp=True)
+    assert (str(err.value) == "Could not find 'FORTRAN_COMPILER' that "
+                              "supports OpenMP.")
 
-    assert ("Could not find 'FORTRAN_COMPILER' that supports OpenMP."
-            in str(err.value))
+
+@mark.parametrize('category', [Category.C_COMPILER,
+                               Category.FORTRAN_COMPILER,
+                               Category.LINKER])
+def test_default_gcc_suite(category, fake_process: FakeProcess) -> None:
+    """
+    Tests setting default suite to "GCC" produces correct tools.
+    """
+    fake_process.register(['gcc', '--version'], stdout='gcc (foo) 1.2.3')
+    fake_process.register(['gfortran', '--version'],
+                          stdout='GNU Fortran (foo) 1.2.3')
+
+    tr = ToolRepository()
+    tr.set_default_compiler_suite('gnu')
+    def_tool = tr.get_default(category, mpi=False, openmp=False)
+    assert def_tool.suite == 'gnu'
 
 
-def test_tool_repository_default_compiler_suite():
-    '''Tests the setting of default suite for compiler and linker.'''
+@mark.parametrize('category', [Category.C_COMPILER,
+                               Category.FORTRAN_COMPILER,
+                               Category.LINKER])
+def test_default_intel_suite(category, fake_process: FakeProcess) -> None:
+    """
+    Tests setting default suite to "classic-intel" produces correct tools.
+    """
+    fake_process.register(['icc', '-V'], stdout='icc (ICC) 1.2.3 foo')
+    fake_process.register(['ifort', '-V'], stdout='ifort (IFORT) 1.2.3 foo')
+
+    tr = ToolRepository()
+    tr.set_default_compiler_suite('intel-classic')
+    def_tool = tr.get_default(category, mpi=False, openmp=False)
+    assert def_tool.suite == 'intel-classic'
+
+
+def test_default_suite_unknown() -> None:
+    """
+    Tests handling if a compiler suite is selected that does not exist.
+    """
+    repo = ToolRepository()
+    with raises(RuntimeError) as err:
+        repo.set_default_compiler_suite("does-not-exist")
+    assert str(err.value) == ("Cannot find 'FORTRAN_COMPILER' in "
+                              "the suite 'does-not-exist'.")
+
+
+def test_no_tool_available(fake_process: FakeProcess) -> None:
+    """
+    Tests error handling if no tool is available.
+    """
+    # All attempted subprocesses fail.
+    #
+    fake_process.register([FakeProcess.any()], returncode=1)
+
     tr = ToolRepository()
     tr.set_default_compiler_suite("gnu")
 
-    # Mark all compiler and linker as available.
-    with mock.patch('fab.tools.tool.Tool.is_available',
-                    new_callable=mock.PropertyMock) as is_available:
-        is_available.return_value = True
-        for cat in [Category.C_COMPILER, Category.FORTRAN_COMPILER,
-                    Category.LINKER]:
-            def_tool = tr.get_default(cat, mpi=False, openmp=False)
-            assert def_tool.suite == "gnu"
-
-        tr.set_default_compiler_suite("intel-classic")
-        for cat in [Category.C_COMPILER, Category.FORTRAN_COMPILER,
-                    Category.LINKER]:
-            def_tool = tr.get_default(cat, mpi=False, openmp=False)
-            assert def_tool.suite == "intel-classic"
-        with pytest.raises(RuntimeError) as err:
-            tr.set_default_compiler_suite("does-not-exist")
-        assert ("Cannot find 'FORTRAN_COMPILER' in the suite 'does-not-exist'"
-                in str(err.value))
+    with raises(RuntimeError) as err:
+        tr.get_default(Category.SHELL)
+    assert (str(err.value) == "Can't find available 'SHELL' tool. Tools are "
+                              "'sh'.")
 
 
-def test_tool_repository_no_tool_available():
-    '''Tests error handling if no tool is available.'''
-
-    tr = ToolRepository()
-    tr.set_default_compiler_suite("gnu")
-    with mock.patch('fab.tools.tool.Tool.is_available',
-                    new_callable=mock.PropertyMock) as is_available:
-        is_available.return_value = False
-        with pytest.raises(RuntimeError) as err:
-            tr.get_default(Category.SHELL)
-        assert ("Can't find available 'SHELL' tool. Tools are 'sh'"
-                in str(err.value))
-
-
-def test_tool_repository_full_path():
+def test_tool_repository_full_path(fake_process: FakeProcess) -> None:
     '''Tests that a user can request a tool with a full path,
     in which case the right tool should be returned with an updated
     exec name that uses the path.
@@ -238,11 +276,5 @@ def test_tool_repository_full_path():
     assert gfortran.name == "gfortran"
     assert gfortran.exec_name == "/usr/bin/gfortran"
 
-    # Also make sure this name is indeed used when calling the compiler:
-    mock_result = mock.Mock(returncode=0)
-    with mock.patch('fab.tools.tool.subprocess.run',
-                    return_value=mock_result) as tool_run:
-        gfortran.run("a")
-    tool_run.assert_called_once_with(
-        ["/usr/bin/gfortran", "a"], capture_output=True, env=None,
-        cwd=None, check=False)
+    fake_process.register(['/usr/bin/gfortran', 'a'])
+    gfortran.run("a")
