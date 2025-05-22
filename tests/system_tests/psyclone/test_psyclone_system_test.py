@@ -187,11 +187,11 @@ class TestPsyclone:
 
         with warns(UserWarning, match="no transformation script specified"):
             self.steps(config)
-        first_timestamps = {file: file.stat() for file in config.prebuild_folder.iterdir()}
+        first_timestamps = {file: file.stat().st_mtime for file in config.prebuild_folder.iterdir()}
 
         with warns(UserWarning, match="no transformation script specified"):
             self.steps(config)
-        second_timestamps = {file: file.stat() for file in config.prebuild_folder.iterdir()}
+        second_timestamps = {file: file.stat().st_mtime for file in config.prebuild_folder.iterdir()}
 
         assert second_timestamps == first_timestamps
 
