@@ -500,7 +500,6 @@ class Icc(CCompiler):
         super().__init__(name, exec_name, suite="intel-classic",
                          openmp_flag="-qopenmp",
                          availability_option='-V',
-                         version_argument='-V',
                          version_regex=r"icc \(ICC\) (\d[\d\.]+\d) ")
 
 
@@ -518,7 +517,6 @@ class Ifort(FortranCompiler):
                          module_folder_flag="-module",
                          openmp_flag="-qopenmp",
                          syntax_only_flag="-syntax-only",
-                         version_argument='-V',
                          version_regex=r"ifort \(IFORT\) (\d[\d\.]+\d) ")
 
 
