@@ -228,8 +228,9 @@ def test_default_intel_suite(category, fake_process: FakeProcess) -> None:
     """
     Tests setting default suite to "classic-intel" produces correct tools.
     """
-    fake_process.register(['icc', '-V'], stdout='icc (ICC) 1.2.3 foo')
-    fake_process.register(['ifort', '-V'], stdout='ifort (IFORT) 1.2.3 foo')
+    fake_process.register(['icc', '--version'], stdout='icc (ICC) 1.2.3 foo')
+    fake_process.register(['ifort', '--version'],
+                          stdout='ifort (IFORT) 1.2.3 foo')
 
     tr = ToolRepository()
     tr.set_default_compiler_suite('intel-classic')
