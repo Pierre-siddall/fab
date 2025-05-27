@@ -499,7 +499,6 @@ class Icc(CCompiler):
     def __init__(self, name: str = "icc", exec_name: str = "icc"):
         super().__init__(name, exec_name, suite="intel-classic",
                          openmp_flag="-qopenmp",
-                         availability_option='-V',
                          version_regex=r"icc \(ICC\) (\d[\d\.]+\d) ")
 
 
