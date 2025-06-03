@@ -80,7 +80,8 @@ class Linker(CompilerSuiteTool):
 
     @property
     def mpi(self) -> bool:
-        ''':returns" whether this linker supports MPI or not by checking
+        '''
+        :returns: whether this linker supports MPI or not by checking
             with the wrapped compiler.'''
         return self._compiler.mpi
 
