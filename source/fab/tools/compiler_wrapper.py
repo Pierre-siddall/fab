@@ -9,7 +9,7 @@ the derived classes for mpif90, mpicc, and CrayFtnWrapper and CrayCcWrapper.
 """
 
 from pathlib import Path
-from typing import cast, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import cast, List, Optional, TYPE_CHECKING, Union
 
 from fab.tools.category import Category
 from fab.tools.compiler import Compiler, FortranCompiler
@@ -41,51 +41,6 @@ class CompilerWrapper(Compiler):
             version_regex=self._compiler._version_regex,
             mpi=mpi,
             availability_option=self._compiler.availability_option)
-
-    def get_version(self) -> Tuple[int, ...]:
-        """Determines the version of the compiler. The implementation in the
-        compiler wrapper additionally ensures that the wrapper compiler and
-        compiler wrapper report both the same version. This verifies that the
-        user's build environment is as expected. For example, this will check
-        if mpif90 from mpif90-ifort does indeed invoke ifort (and not e.g.
-        gfortran).
-
-        :returns: a tuple of at least 2 integers, representing the version
-            e.g. (6, 10, 1) for version '6.10.1'.
-
-        :raises RuntimeError: if the compiler was not found, or if it returned
-            an unrecognised output from the version command.
-        :raises RuntimeError: if the compiler wrapper and wrapped compiler
-            have different version numbers.
-        """
-
-        self._version: Optional[Tuple[int, ...]]
-        if self._version is not None:
-            return self._version
-
-        try:
-            compiler_version = self._compiler.get_version()
-        except RuntimeError:
-            # This can e.g. happen if the wrapped compiler is not in PATH
-            # but the wrapper uses the full path (which Fab doesn't know).
-            # Still continue in this case, since this wrapper is using the
-            # wrapped compiler's version detection regex, so we can assume
-            # that the compiler wrapper works, we just can't verify that
-            # it is the same version.
-            compiler_version = None
-
-        wrapper_version = super().get_version()
-        if compiler_version and compiler_version != wrapper_version:
-            compiler_version_string = self._compiler.get_version_string()
-            # We cannot call super().get_version_string(), since this calls
-            # calls get_version(), so we would get an infinite recursion
-            wrapper_version_string = ".".join(str(x) for x in wrapper_version)
-            raise RuntimeError(f"Different version for compiler "
-                               f"'{self._compiler}' "
-                               f"({compiler_version_string}) and compiler "
-                               f"wrapper '{self}' ({wrapper_version_string}).")
-        self._version = wrapper_version
-        return wrapper_version
 
     @property
     def compiler(self) -> Compiler:

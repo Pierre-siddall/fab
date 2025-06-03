@@ -36,7 +36,6 @@ def test_version_and_caching(stub_c_compiler: CCompiler,
     Tests that the compiler wrapper reports the right version number
     from the actual compiler.
     """
-    fake_process.register(['scc', '--version'], stdout='1.2.3')
     fake_process.register(['mpicc', '--version'], stdout='1.2.3')
     mpicc = Mpicc(stub_c_compiler)
 
@@ -46,32 +45,8 @@ def test_version_and_caching(stub_c_compiler: CCompiler,
     # Test that the value is cached:
     assert mpicc.get_version() == (1, 2, 3)
     assert call_list(fake_process) == [
-        ['scc', '--version'],
         ['mpicc', '--version']
     ]
-
-
-def test_version_consistency(stub_c_compiler: CCompiler,
-                             fake_process: FakeProcess) -> None:
-    """
-    Tests that the compiler wrapper and compiler must report the
-    same version number:
-    """
-    # The wrapper must verify that the wrapper compiler and wrapper
-    # report the same version number, otherwise raise an exception.
-    # The first patch changes the return value which the compiler wrapper
-    # will report (since it calls Compiler.get_version), the second
-    # changes the return value of the wrapper compiler instance only:
-    fake_process.register(['scc', '--version'], stdout='1.2.3')
-    fake_process.register(['mpicc', '--version'], stdout='4.5.6')
-
-    mpicc = Mpicc(stub_c_compiler)
-    with raises(RuntimeError) as err:
-        mpicc.get_version()
-    assert str(err.value) == ("Different version for compiler "
-                              "'CCompiler - some C compiler: scc' (1.2.3) and "
-                              "compiler wrapper 'Mpicc - mpicc-some C "
-                              "compiler: mpicc' (4.5.6).")
 
 
 def test_compiler_is_available_ok(stub_c_compiler: CCompiler,
