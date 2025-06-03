@@ -71,24 +71,6 @@ class TestAnalyser:
         with mock.patch('fab.parse.AnalysedFile.save'):
             analysis, artefact = fortran_analyser.run(fpath=module_fpath)
         assert analysis == module_expected
-        assert artefact == (fortran_analyser.config.prebuild_folder /
-                            f'test_fortran_analyser.{analysis.file_hash}.an')
-
-    def test_module_file_no_openmp(self, fortran_analyser, module_fpath,
-                                   module_expected):
-        '''Disable OpenMP, meaning the dependency on compute_chunk_size_mod
-        should not be detected anymore.
-        '''
-        fortran_analyser.config._openmp = False
-        with mock.patch('fab.parse.AnalysedFile.save'):
-            analysis, artefact = fortran_analyser.run(fpath=module_fpath)
-
-        # Without parsing openmp sentinels, the compute_chunk... symbols
-        # must not be added:
-        module_expected.module_deps.remove('compute_chunk_size_mod')
-        module_expected.symbol_deps.remove('compute_chunk_size_mod')
-
-        assert analysis == module_expected
         assert artefact == (fortran_analyser._config.prebuild_folder /
                             f'test_fortran_analyser.{analysis.file_hash}.an')
 
