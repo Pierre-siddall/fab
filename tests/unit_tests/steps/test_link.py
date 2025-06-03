@@ -26,7 +26,6 @@ class TestLinkExe:
         '''Ensure the command is formed correctly, with the flags at the
         end and that environment variable FFLAGS is picked up.
         '''
-
         config = SimpleNamespace(
             project_workspace=Path('workspace'),
             artefact_store=ArtefactStore(),
