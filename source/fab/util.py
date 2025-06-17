@@ -24,24 +24,27 @@ import fab
 logger = logging.getLogger(__name__)
 
 
+# FIXME: Deprecated
 def log_or_dot(logger, msg):
     """
     Util function which prints a fullstop without a newline, except in debug logging where it logs a message.
 
     """
+    return
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(msg)
     elif logger.isEnabledFor(logging.INFO):
         print('.', end='')
         sys.stdout.flush()
 
-
+# FIXME: Deprecated
 def log_or_dot_finish(logger):
     """
     Util function which completes the row of fullstops from :func:`~fab.util.log_or_dot`,
     by printing a newline when not in debug logging.
 
     """
+    return
     if logger.isEnabledFor(logging.INFO):
         print('')
 
@@ -140,7 +143,7 @@ class TimerLogger(Timer):
 
     def __enter__(self):
         super().__enter__()
-        logger.info("\n" + self.label)
+        logger.info(self.label)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

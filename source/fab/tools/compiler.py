@@ -21,6 +21,8 @@ from fab.tools.tool import CompilerSuiteTool
 if TYPE_CHECKING:
     from fab.build_config import BuildConfig
 
+from .. import CommandAvailableError
+
 
 class Compiler(CompilerSuiteTool):
     '''This is the base class for any compiler. It provides flags for
@@ -156,6 +158,9 @@ class Compiler(CompilerSuiteTool):
             self.get_version()
             # A valid version means the compiler is available.
             return True
+        except CommandAvailableError:
+            # Ignore errors caused by unavailable commands
+            return False
         except RuntimeError as err:
             # Compiler does not exist, or version could not be handled:
             self.logger.error(f'Error getting compiler version: {err}')
@@ -221,11 +226,7 @@ class Compiler(CompilerSuiteTool):
         :raises RuntimeError: if the compiler was not found, or raised an
             error.
         '''
-        try:
-            return self.run(version_command, capture_output=True)
-        except RuntimeError as err:
-            raise RuntimeError(f"Error asking for version of compiler "
-                               f"'{self.name}'") from err
+        return self.run(version_command, capture_output=True)
 
     def get_version_string(self) -> str:
         """

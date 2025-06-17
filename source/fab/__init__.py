@@ -7,15 +7,30 @@
 Flexible build system for scientific software.
 
 """
-import logging
 import sys
 
 __version__ = '1.1.dev0'
 
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler(sys.stdout))
-logger.setLevel(logging.INFO)
-
 
 class FabException(Exception):
     pass
+
+
+class FabRuntimeError(RuntimeError):
+    pass
+
+
+class CommandAvailableError(FabRuntimeError):
+
+    def __init__(self, name):
+        super().__init__(f"command {repr(name)} is not available")
+
+
+class CommandRuntimeError(FabRuntimeError):
+    def __init__(self, name, rc, command, output, error):
+        self.name = name
+        self.rc = int(rc)
+        self.command = command
+        self.output = output
+        self.error = error
+        super().__init__(f"command {repr(command)} returned {rc}")

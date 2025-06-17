@@ -147,9 +147,7 @@ class BuildConfig():
 
     def __enter__(self):
 
-        logger.info('')
         logger.info(f'initialising {self.project_label}')
-        logger.info('')
 
         if self.verbose:
             logging.getLogger('fab').setLevel(logging.DEBUG)
@@ -177,7 +175,6 @@ class BuildConfig():
 
         # always
         self._finalise_metrics(self._start_time, self._build_timer)
-        self._finalise_logging()
 
     @property
     def tool_box(self) -> ToolBox:
@@ -228,9 +225,7 @@ class BuildConfig():
     def _run_prep(self):
         self._init_logging()
 
-        logger.info('')
         logger.info(f'running {self.project_label}')
-        logger.info('')
 
         self._prep_folders()
 
@@ -246,28 +241,11 @@ class BuildConfig():
 
     def _init_logging(self):
         # add a file logger for our run
-        self.project_workspace.mkdir(parents=True, exist_ok=True)
-        log_file_handler = RotatingFileHandler(
-            self.project_workspace / 'log.txt', backupCount=5, delay=True)
-        log_file_handler.doRollover()
-        logging.getLogger('fab').addHandler(log_file_handler)
-
-        logger.info(f"{datetime.now()}")
         if self.multiprocessing:
             logger.info(f'machine cores: {cpu_count()}')
             logger.info(f'available cores: {len(os.sched_getaffinity(0))}')
             logger.info(f'using n_procs = {self.n_procs}')
         logger.info(f"workspace is {self.project_workspace}")
-
-    def _finalise_logging(self):
-        # remove our file logger
-        fab_logger = logging.getLogger('fab')
-        log_file_handlers = list(by_type(fab_logger.handlers,
-                                         RotatingFileHandler))
-        if len(log_file_handlers) != 1:
-            warnings.warn(f'expected to find 1 RotatingFileHandler for '
-                          f'removal, found {len(log_file_handlers)}')
-        fab_logger.removeHandler(log_file_handlers[0])
 
     def _finalise_metrics(self, start_time, steps_timer):
         send_metric('run', 'label', self.project_label)

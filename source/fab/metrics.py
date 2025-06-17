@@ -182,7 +182,7 @@ def metrics_summary(metrics_folder: Path):
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt  # type: ignore
     except ImportError:
-        logger.warning('matplotlib not installed, no metrics summary charts produced')
+        logger.debug('matplotlib not installed, no metrics summary charts produced')
         return
 
     with open(metrics_folder / JSON_FILENAME, 'rt') as outfile:

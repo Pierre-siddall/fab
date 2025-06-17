@@ -159,7 +159,7 @@ def compile_pass(config, compiled: Dict[Path, CompiledFile],
     compile_next = get_compile_next(compiled, uncompiled)
 
     # compile
-    logger.info(f"\ncompiling {len(compile_next)} of {len(uncompiled)} "
+    logger.info(f"compiling {len(compile_next)} of {len(uncompiled)} "
                 f"remaining files")
     mp_args = [(fpath, mp_common_args) for fpath in compile_next]
     results_this_pass = run_mp(config, items=mp_args, func=process_file)
