@@ -50,6 +50,8 @@ from fab.parse.fortran import AnalysedFortran, FortranParserWorkaround, FortranA
 from fab.steps import run_mp, step
 from fab.util import TimerLogger, by_type
 
+from ..progress import ProgressReport
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_SOURCE_GETTER = CollectionConcat([
@@ -61,7 +63,7 @@ DEFAULT_SOURCE_GETTER = CollectionConcat([
 # todo: split out c and fortran? this class is still a bit big
 # This has all been done as a single step, for now, because we don't have a simple mp pattern
 # (i.e we don't have a list of artefacts and a function to feed them through).
-@step
+@ProgressReport("analysed source code")
 def analyse(
         config,
         source: Optional[ArtefactsGetter] = None,
@@ -239,7 +241,7 @@ def _parse_files(config, files: List[Path], fortran_analyser, c_analyser) -> Set
     # fortran
     fortran_files = set(filter(lambda f: f.suffix in ['.f90', '.f'], files))
     with TimerLogger(f"analysing {len(fortran_files)} preprocessed fortran files"):
-        fortran_results = run_mp(config, items=fortran_files, func=fortran_analyser.run)
+        fortran_results = run_mp(config, items=fortran_files, func=fortran_analyser.run, description="Analysing Fortran")
     fortran_analyses, fortran_artefacts = zip(*fortran_results) if fortran_results else (tuple(), tuple())
 
     # warn about naughty fortran usage
@@ -255,7 +257,7 @@ def _parse_files(config, files: List[Path], fortran_analyser, c_analyser) -> Set
         if sys.version.startswith('3.7'):
             warnings.warn('Python 3.7 detected. Disabling multiprocessing for C analysis.')
             no_multiprocessing = True
-        c_results = run_mp(config, items=c_files, func=c_analyser.run, no_multiprocessing=no_multiprocessing)
+        c_results = run_mp(config, items=c_files, func=c_analyser.run, no_multiprocessing=no_multiprocessing, description="Analysing C")
     c_analyses, c_artefacts = zip(*c_results) if c_results else (tuple(), tuple())
 
     # Check for parse errors but don't fail. The failed files might not be required.

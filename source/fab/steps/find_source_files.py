@@ -14,6 +14,8 @@ from fab.artefacts import ArtefactSet
 from fab.steps import step
 from fab.util import file_walk
 
+from ..progress import ProgressSpinner
+
 logger = logging.getLogger(__name__)
 
 
@@ -75,7 +77,7 @@ class Exclude(_PathFilter):
         return f'Exclude({", ".join(self.filter_strings)})'
 
 
-@step
+@ProgressSpinner("Finding source files", "found source files")
 def find_source_files(config, source_root=None,
                       output_collection=ArtefactSet.INITIAL_SOURCE,
                       path_filters: Optional[Iterable[_PathFilter]] = None):

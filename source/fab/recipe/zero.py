@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-
+##############################################################################
+# (c) Crown copyright Met Office. All rights reserved.
+# For further details please refer to the file COPYRIGHT
+# which you should have received as part of this distribution
+##############################################################################
 """
 Zero configuration mode.
 """
@@ -18,6 +22,15 @@ from fab.steps.compile_fortran import compile_fortran
 from fab.steps.compile_c import compile_c
 from fab.steps.link import link_exe
 from .base import FabRecipeBase
+
+try:
+    import rich.console
+
+    HAVE_RICH = True
+except ModuleNotFoundError:
+    HAVE_RICH = False
+
+from time import sleep
 
 
 class ZeroConfigRecipe(FabRecipeBase):
@@ -50,6 +63,9 @@ class ZeroConfigRecipe(FabRecipeBase):
         tool_box.add_tool(fc)
         tool_box.add_tool(linker)
 
+        if HAVE_RICH:
+            self.console = rich.console.Console()
+
         with BuildConfig(
             project_label=project_label,
             mpi=False,
@@ -60,9 +76,11 @@ class ZeroConfigRecipe(FabRecipeBase):
 
             grab_folder(config, args.source)
             find_source_files(config)
+
             preprocess_fortran(config)
             c_pragma_injector(config)
             analyse(config, find_programs=True)
+
             compile_fortran(config)
             compile_c(config)
             link_exe(config, flags=[])

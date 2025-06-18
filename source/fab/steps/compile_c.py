@@ -22,6 +22,8 @@ from fab.steps import check_for_errors, run_mp, step
 from fab.tools import Category, Compiler, Flags
 from fab.util import CompiledFile, log_or_dot, Timer, by_type
 
+from ..progress import ProgressReport
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_SOURCE_GETTER = FilterBuildTrees(suffix='.c')
@@ -35,7 +37,7 @@ class MpCommonArgs:
     flags: FlagsConfig
 
 
-@step
+@ProgressReport("compiled C source")
 def compile_c(config, common_flags: Optional[List[str]] = None,
               path_flags: Optional[List] = None,
               source: Optional[ArtefactsGetter] = None):

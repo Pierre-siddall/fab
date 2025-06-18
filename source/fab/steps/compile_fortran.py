@@ -26,6 +26,8 @@ from fab.tools import Category, Compiler, Flags
 from fab.util import (CompiledFile, log_or_dot_finish, log_or_dot, Timer,
                       by_type, file_checksum)
 
+from ..progress import ProgressReport
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_SOURCE_GETTER = FilterBuildTrees(suffix=['.f', '.f90'])
@@ -41,7 +43,7 @@ class MpCommonArgs:
     syntax_only: bool
 
 
-@step
+@ProgressReport("compiled Fortran source")
 def compile_fortran(config: BuildConfig,
                     common_flags: Optional[List[str]] = None,
                     path_flags: Optional[List] = None,
@@ -118,7 +120,8 @@ def compile_fortran(config: BuildConfig,
         # todo: order by last compile duration
         uncompiled = set(sum(build_lists.values(), []))
         mp_args = [(fpath, mp_common_args) for fpath in uncompiled]
-        results_this_pass = run_mp(config, items=mp_args, func=process_file)
+        results_this_pass = run_mp(config, items=mp_args, func=process_file,
+                                   description="Syntax checking Fortran")
         log_or_dot_finish(logger)
         check_for_errors(results_this_pass, caller_label="compile_fortran")
         compiled_this_pass = list(by_type(results_this_pass, CompiledFile))
@@ -162,7 +165,7 @@ def compile_pass(config, compiled: Dict[Path, CompiledFile],
     logger.info(f"compiling {len(compile_next)} of {len(uncompiled)} "
                 f"remaining files")
     mp_args = [(fpath, mp_common_args) for fpath in compile_next]
-    results_this_pass = run_mp(config, items=mp_args, func=process_file)
+    results_this_pass = run_mp(config, items=mp_args, func=process_file, description="Compiling Fortran")
 
     # there's a compilation result and a list of prebuild files for each
     # compiled file

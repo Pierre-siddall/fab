@@ -15,11 +15,13 @@ from fab import FabException
 from fab.artefacts import ArtefactSet, ArtefactsGetter, SuffixFilter
 from fab.steps import run_mp, step
 
+from ..progress import ProgressReport
+
 DEFAULT_SOURCE_GETTER = SuffixFilter(ArtefactSet.C_BUILD_FILES, '.c')
 
 
 # todo: test
-@step
+@ProgressReport("C pragmas injected")
 def c_pragma_injector(config, source: Optional[ArtefactsGetter] = None,
                       output_name=None):
     """
@@ -50,7 +52,7 @@ def c_pragma_injector(config, source: Optional[ArtefactsGetter] = None,
     output_name = output_name or ArtefactSet.PRAGMAD_C
 
     files = source_getter(config.artefact_store)
-    results = run_mp(config, items=files, func=_process_artefact)
+    results = run_mp(config, items=files, func=_process_artefact, description="C pragmas")
     config.artefact_store[output_name] = set(results)
     config.artefact_store.replace(ArtefactSet.C_BUILD_FILES,
                                   remove_files=files,

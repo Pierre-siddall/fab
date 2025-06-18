@@ -16,6 +16,8 @@ from fab.steps import step
 from fab.tools import Category
 from fab.artefacts import ArtefactsGetter, CollectionGetter
 
+from ..progress import ProgressSpinner
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,7 +34,7 @@ class DefaultLinkerSource(ArtefactsGetter):
                or CollectionGetter(ArtefactSet.OBJECT_FILES)(artefact_store)
 
 
-@step
+@ProgressSpinner("Linking executable", "linked executable")
 def link_exe(config,
              libs: Optional[List[str]] = None,
              flags: Optional[List[str]] = None,

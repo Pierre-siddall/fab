@@ -22,6 +22,8 @@ from fab.tools import Category, Cpp, CppFortran, Preprocessor
 from fab.util import (log_or_dot_finish, input_to_output_fpath, log_or_dot,
                       suffix_filter, Timer, by_type)
 
+from ..progress import ProgressReport
+
 logger = logging.getLogger(__name__)
 
 
@@ -85,7 +87,8 @@ def pre_processor(config: BuildConfig, preprocessor: Preprocessor,
     # bundle files with common args
     mp_args = [(file, mp_common_args) for file in files]
 
-    results = run_mp(config, items=mp_args, func=process_artefact)
+    results = run_mp(config, items=mp_args, func=process_artefact,
+                     description="Pre-processing source")
     check_for_errors(results, caller_label=name)
 
     log_or_dot_finish(logger)
@@ -127,7 +130,7 @@ def process_artefact(arg: Tuple[Path, MpCommonArgs]):
 
 
 # todo: rename preprocess_fortran
-@step
+@ProgressReport("pre-processed Fortran")
 def preprocess_fortran(config: BuildConfig, source: Optional[ArtefactsGetter] = None, **kwargs):
     """
     Wrapper to pre_processor for Fortran files.

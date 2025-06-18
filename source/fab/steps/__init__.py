@@ -29,8 +29,9 @@ def step(func):
 
     return wrapper
 
+from ..workers import WorkerPool
 
-def run_mp(config, items, func, no_multiprocessing: bool = False):
+def run_mp(config, items, func, no_multiprocessing: bool = False, description="Working"):
     """
     Called from Step.run() to process multiple items in parallel.
 
@@ -46,6 +47,10 @@ def run_mp(config, items, func, no_multiprocessing: bool = False):
         Overrides the config's multiprocessing flag, disabling multiprocessing for this call.
 
     """
+
+    pool = WorkerPool(1 if no_multiprocessing else config.n_procs)
+    return pool(func, items, description)
+    
     if config.multiprocessing and not no_multiprocessing:
         with multiprocessing.Pool(config.n_procs) as p:
             results = p.map(func, items)

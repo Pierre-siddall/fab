@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-
-
+##############################################################################
+# (c) Crown copyright Met Office. All rights reserved.
+# For further details please refer to the file COPYRIGHT
+# which you should have received as part of this distribution
+##############################################################################
 """
 Fab command to build and maintain application software.
 """
@@ -69,10 +72,17 @@ def process_arguments(argv):
 
 def import_from_path(module_name, file_path):
     """Load a module by file path."""
+    # Temporarily disable bytecode genearation
+    bytecode_setting = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
+
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module
     spec.loader.exec_module(module)
+
+    # Restore previous bytecode generation setting
+    sys.dont_write_bytecode = bytecode_setting
     return module
 
 

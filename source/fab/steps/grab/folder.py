@@ -10,7 +10,10 @@ from fab.steps import step
 from fab.tools import Category
 
 
-@step
+from ...progress import ProgressSpinner
+
+
+@ProgressSpinner("Getting folder {1}", "got folder {1}")
 def grab_folder(config, src: Union[Path, str], dst_label: str = ''):
     """
     Copy a source folder to the project workspace.
