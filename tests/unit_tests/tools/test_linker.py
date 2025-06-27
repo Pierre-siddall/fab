@@ -75,15 +75,6 @@ def test_linker_openmp(openmp: bool) -> None:
     assert wrapped_linker.openmp == openmp
 
 
-def test_linker_gets_ldflags(stub_c_compiler: CCompiler, monkeypatch) -> None:
-    """
-    Tests that the linker retrieves the LDFLAGS environment variable.
-    """
-    monkeypatch.setenv('LDFLAGS', '-lm')
-    linker = Linker(compiler=stub_c_compiler)
-    assert "-lm" in linker.get_flags()
-
-
 def test_check_available(stub_c_compiler: CCompiler,
                          fake_process: FakeProcess) -> None:
     """
@@ -319,10 +310,7 @@ def test_linker_all_flag_types(stub_c_compiler: CCompiler,
     """
     Tests linker arguments are used in the correct order.
 
-    Todo: Monkeying with private state.
     """
-    # Environment variables for both the linker
-    monkeypatch.setenv('LDFLAGS', '-ldflag')
 
     linker = Linker(compiler=stub_c_compiler)
 
@@ -338,7 +326,7 @@ def test_linker_all_flag_types(stub_c_compiler: CCompiler,
     linker.link([Path("a.o")], Path("a.out"),
                 libs=["customlib2", "customlib1"], config=stub_configuration)
     assert subproc_record.invocations() == [
-        ['scc', "-ldflag", "-linker-flag1", "-linker-flag2",
+        ['scc', "-linker-flag1", "-linker-flag2",
          "-compiler-flag1", "-compiler-flag2",
          "-omp",
          "a.o",

@@ -6,7 +6,6 @@
 """
 Exercise compiler tools.
 """
-import os
 from pathlib import Path
 from textwrap import dedent
 from unittest import mock
@@ -148,15 +147,6 @@ def test_compiler_hash_invalid_version():
             cc.get_hash()
         assert ("Unexpected version output format for compiler 'gcc'"
                 in str(err.value))
-
-
-def test_compiler_with_env_fflags():
-    '''Test that content of FFLAGS is added to the compiler flags.'''
-    with mock.patch.dict(os.environ, FFLAGS='--foo --bar'):
-        cc = Gcc()
-        fc = Gfortran()
-        assert cc.get_flags() == ["--foo", "--bar"]
-        assert fc.get_flags() == ["--foo", "--bar"]
 
 
 def test_compiler_syntax_only():
