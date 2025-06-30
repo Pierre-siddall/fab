@@ -81,7 +81,7 @@ class TestArchiveObjects:
                             output_fpath=config.build_output / 'mylib.a')
 
         # ensure the correct command line calls were made
-        mock_run_command.assert_called_with([
+        mock_run_command.assert_called_once_with([
             'ar', 'cr', str(config.build_output / 'mylib.a'),
             'util1.o', 'util2.o'],
             capture_output=True, env=None, cwd=None, check=False)
