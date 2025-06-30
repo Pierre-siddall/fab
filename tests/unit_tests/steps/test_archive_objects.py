@@ -84,7 +84,7 @@ class TestArchiveObjects:
         mock_run_command.assert_has_calls([
             'ar', 'cr', str(config.build_output / 'mylib.a'),
             'util1.o', 'util2.o'],
-            capture_output=True, env=None, cwd=None, check=False)
+)
 
         # ensure the correct artefacts were created
         assert config.artefact_store[ArtefactSet.OBJECT_ARCHIVES] == {
