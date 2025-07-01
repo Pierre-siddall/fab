@@ -65,10 +65,10 @@ class TestArchiveObjects:
         # previous test does not have this problem since it uses
         # `assert_has_calls`. It is sufficient to just get ar from a ToolBox,
         # this will make sure ar actually works, so `ar --version` is called.
-        # tool_box = ToolBox()
-        # = tool_box.get_tool(Category.AR)
+        tool_box = ToolBox()
+        _ = tool_box.get_tool(Category.AR)
 
-        config = BuildConfig('proj')
+        config = BuildConfig('proj', tool_box)
         config.artefact_store.update_dict(
             ArtefactSet.OBJECT_FILES, None, {'util1.o', 'util2.o'})
 
