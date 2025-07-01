@@ -80,3 +80,15 @@ class ToolBox:
         tool = tr.get_default(category, mpi=mpi, openmp=openmp)
         self._all_tools[category] = tool
         return tool
+    
+    def delete_tool(self, category: Category) -> None:
+        '''Deletes the tool for the specified category.
+
+        :param category: the name of the category in which to look
+            for the tool.
+
+        :raises KeyError: if the category is not known.
+        '''
+        if category not in self._all_tools:
+            raise KeyError(f"No tool found for category '{category}'")
+        del self._all_tools[category]

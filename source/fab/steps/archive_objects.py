@@ -103,7 +103,6 @@ def archive_objects(config: BuildConfig,
     # to the proj folder
 
     source_getter = source or DEFAULT_SOURCE_GETTER
-    config.tool_box.add_tool(Ar(), silent_replace=True)
     ar = config.tool_box[Category.AR]
     if not isinstance(ar, Ar):
         raise RuntimeError(f"Unexpected tool '{ar.name}' of type "
@@ -138,3 +137,4 @@ def archive_objects(config: BuildConfig,
 
         config.artefact_store.update_dict(output_collection, root,
                                           output_fpath)
+        
