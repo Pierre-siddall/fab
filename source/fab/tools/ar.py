@@ -32,5 +32,6 @@ class Ar(Tool):
         # Explicit type is required to avoid mypy errors :(
         output_fpath = output_fpath.unlink()
         parameters: List[Union[Path, str]] = ["cr", output_fpath]
+
         parameters.extend(map(str, members))
         return self.run(additional_parameters=parameters)
