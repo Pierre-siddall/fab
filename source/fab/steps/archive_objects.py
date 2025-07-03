@@ -137,4 +137,3 @@ def archive_objects(config: BuildConfig,
 
         config.artefact_store.update_dict(output_collection, root,
                                           output_fpath)
-    config.tool_box.delete_tool(Category.AR)

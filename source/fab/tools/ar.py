@@ -30,7 +30,6 @@ class Ar(Tool):
         :param members: the list of objects to be added to the archive.
         '''
         # Explicit type is required to avoid mypy errors :(
-        parameters: List[Union[Path, str]] = ["cr", output_fpath]
-
+        parameters: List[Union[Path, str]] = ["cr", output_fpath.unlink()]
         parameters.extend(map(str, members))
         return self.run(additional_parameters=parameters)
