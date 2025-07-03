@@ -146,4 +146,3 @@ def archive_objects(
             raise RuntimeError(f"error creating object archive:\n{err}") from err
 
         config.artefact_store.update_dict(output_collection, root, output_fpath)
-    config.tool_box.delete_tool(Category.AR)
