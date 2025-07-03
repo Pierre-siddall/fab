@@ -15,21 +15,22 @@ from fab.tools.tool import Tool
 
 
 class Ar(Tool):
-    '''This is the base class for `ar`.
-    '''
+    """This is the base class for `ar`."""
 
     def __init__(self):
         super().__init__("ar", "ar", Category.AR)
 
-    def create(self, output_fpath: Path,
-               members: List[Union[Path, str]]):
-        '''Create the archive with the specified name, containing the
+    def create(self, output_fpath: Path, members: List[Union[Path, str]]):
+        """Create the archive with the specified name, containing the
         listed members.
 
         :param output_fpath: the output path.
         :param members: the list of objects to be added to the archive.
-        '''
+        """
         # Explicit type is required to avoid mypy errors :(
-        parameters: List[Union[Path, str]] = ["cr", output_fpath.unlink()]
+        if output_fpath.exists():
+            output_fpath.unlink()
+
+        parameters: List[Union[Path, str]] = ["cr", output_fpath]
         parameters.extend(map(str, members))
         return self.run(additional_parameters=parameters)
