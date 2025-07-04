@@ -31,8 +31,10 @@ class Ar(Tool):
         # Explicit type is required to avoid mypy errors :(
         if type(output_fpath) is not Path:
             os.unlink(output_fpath)
-        else:
+        elif type(output_fpath) is Path:
             output_fpath.unlink(missing_ok=True)
+        else:
+            raise TypeError(f"Expected Path or str, got {type(output_fpath)}")
 
         parameters: List[Union[Path, str]] = ["cr", output_fpath]
         parameters.extend(map(str, members))
