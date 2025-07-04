@@ -28,7 +28,6 @@ class Ar(Tool):
         :param members: the list of objects to be added to the archive.
         """
         # If the output path of the archive already exists then unlink it.
-        output_fpath.unlink(missing_ok=True)
-        parameters: List[Union[Path, str]] = ["cr", output_fpath]
+        parameters: List[Union[Path, str]] = ["cr", output_fpath.unlink(missing_ok=True)]
         parameters.extend(map(str, members))
         return self.run(additional_parameters=parameters)
