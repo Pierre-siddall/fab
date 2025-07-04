@@ -7,6 +7,7 @@
 """This file contains the Ar class for archiving files.
 """
 
+import os
 from pathlib import Path
 from typing import List, Union
 
@@ -28,7 +29,11 @@ class Ar(Tool):
         :param members: the list of objects to be added to the archive.
         """
         # Explicit type is required to avoid mypy errors :(
-        output_fpath.unlink(missing_ok=True)
+        if type(output_fpath) is not Path:
+            os.unlink(output_fpath)
+        else:
+            output_fpath.unlink(missing_ok=True)
+
         parameters: List[Union[Path, str]] = ["cr", output_fpath]
         parameters.extend(map(str, members))
         return self.run(additional_parameters=parameters)
