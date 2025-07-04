@@ -28,13 +28,9 @@ class Ar(Tool):
         :param output_fpath: the output path.
         :param members: the list of objects to be added to the archive.
         """
-        # Explicit type is required to avoid mypy errors :(
-        if type(output_fpath) is not Path:
-            os.unlink(output_fpath)
-        elif type(output_fpath) is Path:
-            output_fpath.unlink(missing_ok=True)
-        else:
-            raise TypeError(f"Expected Path or str, got {type(output_fpath)}")
+        # If the output path of the archive already exists then unlink it. 
+        if output_fpath.exists():
+            output_fpath.unlink()
 
         parameters: List[Union[Path, str]] = ["cr", output_fpath]
         parameters.extend(map(str, members))
