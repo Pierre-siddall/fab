@@ -7,7 +7,6 @@
 """This file contains the Ar class for archiving files.
 """
 
-import os
 from pathlib import Path
 from typing import List, Union
 
