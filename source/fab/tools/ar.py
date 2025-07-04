@@ -28,7 +28,7 @@ class Ar(Tool):
         :param output_fpath: the output path.
         :param members: the list of objects to be added to the archive.
         """
-        # If the output path of the archive already exists then unlink it. 
+        # If the output path of the archive already exists then unlink it.
         if output_fpath.exists():
             output_fpath.unlink()
 
