@@ -21,7 +21,7 @@ class Ar(Tool):
     def __init__(self):
         super().__init__("ar", "ar", Category.AR)
 
-    def create(self, output_fpath: Union[str, Path],
+    def create(self, output_fpath: Path,
                members: List[Union[Path, str]]):
         '''Create the archive with the specified name, containing the
         listed members.
@@ -30,8 +30,6 @@ class Ar(Tool):
         :param members: the list of objects to be added to the archive.
         '''
         # Explicit type is required to avoid mypy errors :(
-        if isinstance(output_fpath, str):
-            output_fpath = Path(output_fpath)
         output_fpath.unlink(missing_ok=True)
         parameters: List[Union[Path, str]] = ["cr", output_fpath]
         parameters.extend(map(str, members))
