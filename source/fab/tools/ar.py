@@ -8,7 +8,7 @@
 """
 
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Optional
 
 from fab.tools.category import Category
 from fab.tools.tool import Tool
@@ -21,7 +21,7 @@ class Ar(Tool):
     def __init__(self):
         super().__init__("ar", "ar", Category.AR)
 
-    def create(self, output_fpath: Path,
+    def create(self, output_fpath: Optional[Path],
                members: List[Union[Path, str]]):
         '''Create the archive with the specified name, containing the
         listed members.
