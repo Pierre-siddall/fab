@@ -66,7 +66,7 @@ class ArtefactStore(dict):
                 self[artefact] = set()
 
     def add(self, collection: Union[str, ArtefactSet],
-            files: Path):
+            files: Iterable[Path]):
         '''Adds the specified artefacts to a collection. The artefact
         can be specified as a simple string, a list of string or a set, in
         which case all individual entries of the list/set will be added.
