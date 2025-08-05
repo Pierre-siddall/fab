@@ -31,7 +31,7 @@ class Ar(Tool):
         '''
         # Explicit type is required to avoid mypy errors :(
         if isinstance(output_fpath, str):
-            output_fpath = Path(output_fpath)    
+            output_fpath = Path(output_fpath)  
         output_fpath.unlink(missing_ok=True)
         parameters: List[Union[Path, str]] = ["cr", output_fpath]
         parameters.extend(map(str, members))
