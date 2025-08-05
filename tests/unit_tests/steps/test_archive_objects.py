@@ -56,7 +56,7 @@ class TestArchiveObjects:
 
         # ensure the correct artefacts were created
         assert config.artefact_store[ArtefactSet.OBJECT_ARCHIVES] == {
-            target: {str(config.build_output / f'{target}.a')}
+            target: {Path(str(config.build_output / f'{target}.a'))}
             for target in targets}
 
     def test_for_library(self, stub_tool_box,
@@ -86,7 +86,7 @@ class TestArchiveObjects:
 
         # ensure the correct artefacts were created
         assert config.artefact_store[ArtefactSet.OBJECT_ARCHIVES] == {
-            None: {str(config.build_output / 'mylib.a')}}
+            None: {Path(str(config.build_output / 'mylib.a'))}}
 
     def test_incorrect_tool(self, stub_tool_box):
         """

@@ -73,12 +73,7 @@ class ArtefactStore(dict):
         :param collection: the name of the collection to add this to.
         :param files: the artefacts to add.
         '''
-        if isinstance(files, list):
-            files = set(files)
-        elif not isinstance(files, Iterable):
-            # We need to use a list, otherwise each character is added
-            files = set(Path(files))
-
+        files = {files}
         self[collection].update(files)
 
     def update_dict(self, collection: Union[str, ArtefactSet],
