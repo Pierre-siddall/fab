@@ -108,7 +108,6 @@ def archive_objects(config: BuildConfig,
     if not isinstance(ar, Ar):
         raise RuntimeError(f"Unexpected tool '{ar.name}' of type "
                            f"'{type(ar)}' instead of Ar")
-    output_fpath = str(output_fpath) if output_fpath else None
 
     target_objects = source_getter(config.artefact_store)
     assert target_objects.keys()
