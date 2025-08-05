@@ -21,7 +21,7 @@ class Ar(Tool):
     def __init__(self):
         super().__init__("ar", "ar", Category.AR)
 
-    def create(self, output_fpath,
+    def create(self, output_fpath: Union[str, Path],
                members: List[Union[Path, str]]):
         '''Create the archive with the specified name, containing the
         listed members.

@@ -10,7 +10,8 @@ Object archive creation from a list of object files for use in static linking.
 
 import logging
 from string import Template
-from typing import Optional
+from typing import Optional,Union
+from pathlib import Path 
 
 
 from fab.artefacts import ArtefactSet
@@ -35,7 +36,7 @@ DEFAULT_SOURCE_GETTER = CollectionGetter(ArtefactSet.OBJECT_FILES)
 @step
 def archive_objects(config: BuildConfig,
                     source: Optional[ArtefactsGetter] = None,
-                    output_fpath=None,
+                    output_fpath: Optional[Union[str, Path]] = None,
                     output_collection=ArtefactSet.OBJECT_ARCHIVES):
     """
     Create an object archive for every build target, from their object files.
