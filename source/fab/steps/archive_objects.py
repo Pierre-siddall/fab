@@ -13,7 +13,6 @@ from string import Template
 from typing import Optional, Union
 from pathlib import Path
 
-
 from fab.artefacts import ArtefactSet
 from fab.build_config import BuildConfig
 from fab.steps import step
