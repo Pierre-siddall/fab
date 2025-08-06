@@ -45,7 +45,7 @@ class TestArchiveObjects:
         for target in targets:
             config.artefact_store.update_dict(
                 ArtefactSet.OBJECT_FILES,
-                {f'{target}.o', 'util.o'},
+                {Path(f'{target}.o'), Path('util.o')},
                 target
             )
 
@@ -75,7 +75,7 @@ class TestArchiveObjects:
         config = BuildConfig('proj', stub_tool_box, fab_workspace=Path('/fab'),
                              multiprocessing=False)
         config.artefact_store.update_dict(
-            ArtefactSet.OBJECT_FILES, {'util1.o', 'util2.o'}, None
+            ArtefactSet.OBJECT_FILES, {Path('util1.o'), Path('util2.o')}, None
         )
 
         with warns(UserWarning,
