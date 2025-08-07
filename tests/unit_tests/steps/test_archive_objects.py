@@ -81,7 +81,7 @@ class TestArchiveObjects:
         with warns(UserWarning,
                    match="_metric_send_conn not set, cannot send metrics"):
             archive_objects(config=config,
-                            output_fpath=config.build_output / 'mylib.a')
+                            output_fpath=Path(config.build_output / 'mylib.a'))
         assert call_list(fake_process) == [ar_command]
 
         # ensure the correct artefacts were created
@@ -101,7 +101,7 @@ class TestArchiveObjects:
 
         with raises(RuntimeError) as err:
             archive_objects(config=config,
-                            output_fpath=config.build_output / 'mylib.a')
+                            output_fpath=Path(config.build_output / 'mylib.a'))
         assert str(err.value) == ("Unexpected tool 'some C compiler' of type "
                                   "'<class 'fab.tools.compiler.CCompiler'>' "
                                   "instead of Ar")
