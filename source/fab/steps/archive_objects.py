@@ -10,7 +10,7 @@ Object archive creation from a list of object files for use in static linking.
 
 import logging
 from string import Template
-from typing import Optional, Union
+from typing import Optional
 from pathlib import Path
 
 from fab.artefacts import ArtefactSet

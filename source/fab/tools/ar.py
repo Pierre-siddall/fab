@@ -8,7 +8,7 @@
 """
 
 from pathlib import Path
-from typing import List, Union, Optional
+from typing import List, Union
 
 from fab.tools.category import Category
 from fab.tools.tool import Tool
