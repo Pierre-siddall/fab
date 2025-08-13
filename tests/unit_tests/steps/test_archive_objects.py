@@ -93,7 +93,6 @@ class TestArchiveObjects:
                             output_fpath=Path(config.build_output / 'mylib.a'))
         assert call_list(fake_process) == [ar_command]
 
-
         # ensure the correct artefacts were created
         assert config.artefact_store[ArtefactSet.OBJECT_ARCHIVES] == {
             None: {Path(str(config.build_output / 'mylib.a'))}}
