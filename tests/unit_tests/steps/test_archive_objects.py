@@ -77,8 +77,7 @@ class TestArchiveObjects:
 
         help_command = ['ar', '--version']
         fake_process.register(help_command, stdout='1.0.0')
-        ar_command = ['ar', 'cr', '/fab/proj/build_output/mylib.a',
-                      'util1.o', 'util2.o']
+        ar_command = ['ar', 'cr', '/fab/proj/build_output/mylib.a', 'util1.o', 'util2.o']
         fake_process.register(ar_command)
 
         config = BuildConfig('proj', stub_tool_box, fab_workspace=Path('/fab'),
