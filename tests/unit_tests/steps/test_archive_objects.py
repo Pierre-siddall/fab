@@ -90,7 +90,7 @@ class TestArchiveObjects:
                    match="_metric_send_conn not set, cannot send metrics"):
             archive_objects(config=config,
                             output_fpath=Path(config.build_output / 'mylib.a'))
-        assert call_list(fake_process) == [ar_command]
+        assert call_list(fake_process) == [help_command,ar_command]
 
         # ensure the correct artefacts were created
         assert config.artefact_store[ArtefactSet.OBJECT_ARCHIVES] == {
