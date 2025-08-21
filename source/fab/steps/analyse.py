@@ -292,20 +292,22 @@ def _add_manual_results(special_measure_analysis_results, analysed_files: Set[An
         logger.info(f'added {len(special_measure_analysis_results)} manual analysis results')
 
 
-def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent]) -> Dict[str, Path]:
+def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent], debug=False) -> Dict[str, Path]:
     """
     Create a dictionary mapping symbol names to the files in which they appear.
 
     """
     symbols: Dict[str, Path] = {}
-    duplicates = []
+    duplicates = False
     for analysed_file in analysed_files:
         for symbol_def in analysed_file.symbol_defs:
             # check for duplicates
             if symbol_def in symbols:
-                duplicates.append(ValueError(
-                    f"duplicate symbol '{symbol_def}' defined in {analysed_file.fpath} "
-                    f"already found in {symbols[symbol_def]}"))
+                if debug:
+                    logger.warning(
+                        f"duplicate symbol '{symbol_def}' defined in {analysed_file.fpath} "
+                        f"also found in {symbols[symbol_def]}\n")
+                duplicates = True
                 continue
             symbols[symbol_def] = analysed_file.fpath
 
@@ -313,8 +315,8 @@ def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent]) -> Dict[str, 
         # we don't break the build because these symbols might not be
         # required to build the executable.
         # todo: put a big warning at the end of the build?
-        err_msg = "\n".join(map(str, duplicates))
-        warnings.warn(f"Duplicates found while generating symbol table:\n{err_msg}")
+        logger.error(f"Duplicates found while generating symbol table")
+        raise RuntimeError("Error generating symbol table")
 
     return symbols
 
