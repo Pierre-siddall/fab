@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Set
 from unittest.mock import Mock
 
-from pytest import fixture, warns
+from pytest import fixture, warns, raises
 
 from fab.build_config import BuildConfig
 from fab.dep_tree import AnalysedDependent
@@ -44,15 +44,8 @@ class Test_gen_symbol_table(object):
         """
         analysed_files[1].symbol_defs.add('foo_1')
 
-        with warns(UserWarning):
-            result = _gen_symbol_table(analysed_files=analysed_files)
-
-        assert result == {
-            'foo_1': Path('foo.c'),
-            'foo_2': Path('foo.c'),
-            'bar_1': Path('bar.c'),
-            'bar_2': Path('bar.c'),
-        }
+        with raises(RuntimeError):
+            _gen_symbol_table(analysed_files=analysed_files)
 
 
 class Test_gen_file_deps(object):
