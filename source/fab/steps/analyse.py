@@ -315,7 +315,7 @@ def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent], debug=False) 
         # we don't break the build because these symbols might not be
         # required to build the executable.
         # todo: put a big warning at the end of the build?
-        logger.error(f"Duplicates found while generating symbol table")
+        logger.error("Duplicates found while generating symbol table")
         raise RuntimeError("Error generating symbol table")
 
     return symbols
