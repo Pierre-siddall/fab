@@ -13,7 +13,6 @@ from fab.tools import ToolBox
 from fab.util import HashedFile
 
 
-
 class Test_gen_symbol_table(object):
     """
     Tests source symbol management.
