@@ -70,7 +70,7 @@ def analyse(
         std: str = "f2008",
         special_measure_analysis_results: Optional[Iterable[FortranParserWorkaround]] = None,
         unreferenced_deps: Optional[Iterable[str]] = None,
-        ignore_dependencies: Optional[Iterable[str]] = None,
+        ignore_mod_deps: Optional[Iterable[str]] = None,
         ):
     """
     Produce one or more build trees by analysing source code dependencies.
@@ -109,9 +109,8 @@ def analyse(
         For example, functions that are called in a one-line if statement.
         Assuming the files containing these symbols are present and analysed,
         those files and all their dependencies will be added to the build tree(s).
-    :param ignore_dependencies:
-        Third party Fortran module names in USE statements, 'DEPENDS ON' files
-        and modules to be ignored.
+    :param ignore_mod_deps:
+        Third party Fortran module names to be ignored.
     :param name:
         Human friendly name for logger output, with sensible default.
 
@@ -133,7 +132,7 @@ def analyse(
     # todo: these seem more like functions
     fortran_analyser = FortranAnalyser(config=config,
                                        std=std,
-                                       ignore_dependencies=ignore_dependencies)
+                                       ignore_mod_deps=ignore_mod_deps)
     c_analyser = CAnalyser(config=config)
 
     # Creates the *build_trees* artefact from the files in `self.source_getter`.
@@ -316,7 +315,8 @@ def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent], debug=False) 
         # we don't break the build because these symbols might not be
         # required to build the executable.
         # todo: put a big warning at the end of the build?
-        logger.error("Duplicates found while generating symbol table")
+        logger.error("Error generating symbol table")
+        raise ValueError("Duplicate symbol definitions found")
 
     return symbols
 
