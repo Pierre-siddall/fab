@@ -288,7 +288,7 @@ def _add_manual_results(special_measure_analysis_results, analysed_files: Set[An
         logger.info(f'added {len(special_measure_analysis_results)} manual analysis results')
 
 
-def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent], debug=False) -> Dict[str, Path]:
+def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent]) -> Dict[str, Path]:
     """
     Create a dictionary mapping symbol names to the files in which they appear.
 
@@ -299,8 +299,7 @@ def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent], debug=False) 
         for symbol_def in analysed_file.symbol_defs:
             # check for duplicates
             if symbol_def in symbols:
-                if debug:
-                    logger.warning(
+                logger.debug(
                         f"duplicate symbol '{symbol_def}' defined in {analysed_file.fpath} "
                         f"also found in {symbols[symbol_def]}\n")
                 duplicates = True
