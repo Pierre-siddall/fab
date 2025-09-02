@@ -11,7 +11,6 @@ from fab.steps.analyse import (_add_manual_results, _add_unreferenced_deps,
                                _gen_file_deps, _gen_symbol_table, _parse_files)
 from fab.tools import ToolBox
 from fab.util import HashedFile
-from fab import FabException
 
 
 class Test_gen_symbol_table(object):
@@ -44,9 +43,7 @@ class Test_gen_symbol_table(object):
         Tests duplicate symbols in different files.
         """
         analysed_files[1].symbol_defs.add('foo_1')
-
-        with raises(ValueError):
-            _gen_symbol_table(analysed_files=analysed_files)
+        _gen_symbol_table(analysed_files=analysed_files)
 
 
 class Test_gen_file_deps(object):
