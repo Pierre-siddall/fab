@@ -13,6 +13,7 @@ from fab.tools import ToolBox
 from fab.util import HashedFile
 
 
+
 class Test_gen_symbol_table(object):
     """
     Tests source symbol management.
@@ -43,7 +44,9 @@ class Test_gen_symbol_table(object):
         Tests duplicate symbols in different files.
         """
         analysed_files[1].symbol_defs.add('foo_1')
-        _gen_symbol_table(analysed_files=analysed_files)
+
+        with raises(ValueError):
+            _gen_symbol_table(analysed_files=analysed_files)
 
 
 class Test_gen_file_deps(object):
