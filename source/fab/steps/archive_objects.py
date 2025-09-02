@@ -121,7 +121,7 @@ def archive_objects(config: BuildConfig,
 
         if root:
             # we're building an object archive for an executable
-            output_fpath = Path(str(config.build_output / f'{root}.a'))
+            output_fpath = config.build_output / f'{root}.a'
         else:
             # we're building a single object archive with a given filename
             assert len(target_objects) == 1, "unexpected root of None with multiple build targets"
