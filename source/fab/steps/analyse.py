@@ -70,6 +70,7 @@ def analyse(
         std: str = "f2008",
         special_measure_analysis_results: Optional[Iterable[FortranParserWorkaround]] = None,
         unreferenced_deps: Optional[Iterable[str]] = None,
+        ignore_dependencies: Optional[Iterable[str]] = None,
         ):
     """
     Produce one or more build trees by analysing source code dependencies.
