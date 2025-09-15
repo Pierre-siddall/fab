@@ -45,7 +45,13 @@ class Test_gen_symbol_table(object):
         analysed_files[1].symbol_defs.add('foo_1')
 
         with raises(ValueError):
-            _gen_symbol_table(analysed_files=analysed_files)
+            result = _gen_symbol_table(analysed_files=analysed_files)
+        assert result == {
+            'foo_1': Path('foo.c'),
+            'foo_2': Path('foo.c'),
+            'bar_1': Path('bar.c'),
+            'bar_2': Path('bar.c'),
+        }
 
 
 class Test_gen_file_deps(object):
