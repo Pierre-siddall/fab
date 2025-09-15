@@ -44,7 +44,7 @@ class Test_gen_symbol_table(object):
         """
         analysed_files[1].symbol_defs.add('foo_1')
 
-        with raises(ValueError):
+        with warns(UserWarning):
             result = _gen_symbol_table(analysed_files=analysed_files)
         assert result == {
             'foo_1': Path('foo.c'),

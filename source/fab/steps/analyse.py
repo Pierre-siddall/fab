@@ -316,7 +316,7 @@ def _gen_symbol_table(analysed_files: Iterable[AnalysedDependent]) -> Dict[str, 
         # required to build the executable.
         # todo: put a big warning at the end of the build?
         logger.error("Error generating symbol table")
-        raise ValueError("Duplicate symbol definitions found")
+        warnings.warn("Duplicate symbol definitions found")
 
     return symbols
 
