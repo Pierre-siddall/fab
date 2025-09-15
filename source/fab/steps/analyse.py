@@ -109,6 +109,9 @@ def analyse(
         For example, functions that are called in a one-line if statement.
         Assuming the files containing these symbols are present and analysed,
         those files and all their dependencies will be added to the build tree(s).
+    :param ignore_dependencies:
+        Third party Fortran module names in USE statements, 'DEPENDS ON' files
+        and modules to be ignored.
     :param name:
         Human friendly name for logger output, with sensible default.
 
@@ -129,7 +132,8 @@ def analyse(
 
     # todo: these seem more like functions
     fortran_analyser = FortranAnalyser(config=config,
-                                       std=std)
+                                       std=std,
+                                       ignore_dependencies=ignore_dependencies)
     c_analyser = CAnalyser(config=config)
 
     # Creates the *build_trees* artefact from the files in `self.source_getter`.
