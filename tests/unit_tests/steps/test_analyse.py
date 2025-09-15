@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Set
 from unittest.mock import Mock
 
-from pytest import fixture, warns, raises
+from pytest import fixture, warns
 
 from fab.build_config import BuildConfig
 from fab.dep_tree import AnalysedDependent
