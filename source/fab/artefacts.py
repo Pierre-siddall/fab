@@ -27,15 +27,15 @@ from fab.util import suffix_filter
 class ArtefactSet(Enum):
     '''A simple enum with the artefact types used internally in Fab.
     '''
-    INITIAL_SOURCE = auto()
+    INITIAL_SOURCE_FILES = auto()
     PREPROCESSED_FORTRAN = auto()
     PREPROCESSED_C = auto()
-    FORTRAN_BUILD_FILES = auto()
-    C_BUILD_FILES = auto()
-    X90_BUILD_FILES = auto()
+    FORTRAN_COMPILER_FILES = auto()
+    C_COMPILER_FILES = auto()
+    X90_COMPILER_FILES = auto()
     CURRENT_PREBUILDS = auto()
     PRAGMAD_C = auto()
-    BUILD_TREES = auto()
+    BUILD_DEPENDENCIES = auto()
     OBJECT_FILES = auto()
     OBJECT_ARCHIVES = auto()
     EXECUTABLES = auto()
