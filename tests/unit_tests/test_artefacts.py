@@ -75,14 +75,11 @@ def test_artefact_store_update_dict() -> None:
 def test_artefact_store_replace() -> None:
     '''Tests the replace function.'''
     artefact_store = ArtefactStore()
-    artefact_store.add(ArtefactSet.INITIAL_SOURCE_FILES, [Path("a"), Path("b"),
-                                                    Path("c")])
+    artefact_store.add(ArtefactSet.INITIAL_SOURCE_FILES, [Path("a"), Path("b"), Path("c")])
     artefact_store.replace(ArtefactSet.INITIAL_SOURCE_FILES,
                            remove_files=[Path("a"), Path("b")],
                            add_files=[Path("B")])
-    assert artefact_store[ArtefactSet.INITIAL_SOURCE_FILES] == set([Path("B"),
-                                                              Path("c")])
-
+    assert artefact_store[ArtefactSet.INITIAL_SOURCE_FILES] == set([Path("B"), Path("c")])
     # Test the behaviour for dictionaries
     with pytest.raises(RuntimeError) as err:
         artefact_store.replace(ArtefactSet.OBJECT_FILES,
