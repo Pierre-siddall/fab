@@ -15,7 +15,7 @@ from fab import FabException
 from fab.artefacts import ArtefactSet, ArtefactsGetter, SuffixFilter
 from fab.steps import run_mp, step
 
-DEFAULT_SOURCE_GETTER = SuffixFilter(ArtefactSet.C_BUILD_FILES, '.c')
+DEFAULT_SOURCE_GETTER = SuffixFilter(ArtefactSet.C_COMPILER_FILES, '.c')
 
 
 # todo: test
@@ -52,7 +52,7 @@ def c_pragma_injector(config, source: Optional[ArtefactsGetter] = None,
     files = source_getter(config.artefact_store)
     results = run_mp(config, items=files, func=_process_artefact)
     config.artefact_store[output_name] = set(results)
-    config.artefact_store.replace(ArtefactSet.C_BUILD_FILES,
+    config.artefact_store.replace(ArtefactSet.C_COMPILER_FILES,
                                   remove_files=files,
                                   add_files=results)
 
