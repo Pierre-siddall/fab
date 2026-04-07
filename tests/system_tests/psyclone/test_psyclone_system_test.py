@@ -4,7 +4,6 @@
 #  which you should have received as part of this distribution
 # ##############################################################################
 from pathlib import Path
-import shutil
 from typing import Any
 from unittest import mock
 

@@ -10,7 +10,7 @@ Common functionality for both Fortran and (sanitised) X90 processing.
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional,Union
+from typing import Optional, Union
 
 from fparser.common.readfortran import FortranFileReader  # type: ignore
 from fparser.two.parser import ParserFactory  # type: ignore
