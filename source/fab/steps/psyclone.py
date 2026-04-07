@@ -64,13 +64,13 @@ class MpCommonArgs:
 
     """
     config: BuildConfig
-    analysed_x90: Dict[Path, AnalysedX90]
+    analysed_x90: dict[Path, AnalysedX90]
 
     kernel_roots: list[Union[str, Path]]
     transformation_script: Optional[Callable[[Path, BuildConfig], Path]]
     cli_args: list[str]
     api: Union[str, None]
-    all_kernel_hashes: Dict[str, int]
+    all_kernel_hashes: dict[str, int]
     overrides_folder: Optional[Path]
     override_files: list[str]  # filenames (not paths) of hand crafted overrides
 
@@ -191,7 +191,7 @@ def _generate_mp_payload(config, analysed_x90, all_kernel_hashes, overrides_fold
 
 
 def _analyse_x90s(config: BuildConfig,
-                  x90s: set[Path]) -> Dict[Path, AnalysedX90]:
+                  x90s: set[Path]) -> dict[Path, AnalysedX90]:
     """
     Analyse the x90s, finding kernel dependencies.
     """
@@ -224,7 +224,7 @@ def _analyse_x90s(config: BuildConfig,
 def _analyse_kernels(
         config: BuildConfig,
         kernel_roots: list[Path],
-        ignore_dependencies: Optional[Iterable[str]] = None) -> Dict[str, int]:
+        ignore_dependencies: Optional[Iterable[str]] = None) -> dict[str, int]:
     """
     We want to hash the kernel metadata (type defs).
 
@@ -278,7 +278,7 @@ def _analyse_kernels(
     analysed_fortran: list[AnalysedFortran] = list(by_type(fortran_analyses, AnalysedFortran))
 
     # gather all kernel hashes into one big lump
-    all_kernel_hashes: Dict[str, int] = {}
+    all_kernel_hashes: dict[str, int] = {}
     for af in analysed_fortran:
         assert set(af.psyclone_kernels).isdisjoint(all_kernel_hashes), \
             f"duplicate kernel name(s): {set(af.psyclone_kernels) & set(all_kernel_hashes)}"
